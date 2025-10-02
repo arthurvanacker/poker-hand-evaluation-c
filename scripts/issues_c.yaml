@@ -1,0 +1,1382 @@
+# GitHub Issues for Poker Hand Evaluator Project (C)
+# Total: 37 atomic tasks across 5 phases
+# Usage: Parse this file to bulk-create issues via GitHub CLI
+#
+# Milestones:
+#   - 00.Project Initialization
+#   - 01.Foundation Layer
+#   - 02.Evaluation Core
+#   - 03.Detection Layer
+#   - 04.Integration Layer
+#   - 05.Examples & Polish
+#
+# Labels:
+#   - algorithm: Core logic and detection functions
+#   - performance: Benchmarks and optimizations
+#   - documentation: README, guides, docs
+#   - testing: Test coverage and test files
+#   - infrastructure: Project setup, tooling
+#   - refactoring: Code cleanup and restructuring
+#   - good first issue: Beginner-friendly tasks
+
+issues:
+  # ============================================================================
+  # PHASE 00: PROJECT INITIALIZATION (6 tasks)
+  # ============================================================================
+
+  - title: "[00.01] Create standard C project structure"
+    body: |
+      Create the standard C project directory layout for the poker hand evaluator.
+
+      ## Acceptance Criteria
+      - [ ] Create `src/` directory for implementation files (.c)
+      - [ ] Create `include/` directory for public headers (.h)
+      - [ ] Create `tests/` directory for unit tests
+      - [ ] Create `examples/` directory for example programs
+      - [ ] Create `lib/` directory for compiled static/shared libraries
+      - [ ] Create `build/` directory for object files and build artifacts
+      - [ ] Create `/docs/` directory for documentation
+      - [ ] Create `/analysis/` directory for performance analysis
+      - [ ] Verify all directories are created and committed
+
+      ## Notes
+      This establishes the foundation for a well-organized C library following community standards.
+    labels: [infrastructure]
+    milestone: "00.Project Initialization"
+
+  - title: "[00.02] Create Makefile for build system"
+    body: |
+      Create a Makefile to manage compilation and building.
+
+      ## Acceptance Criteria
+      - [ ] Create `Makefile` in root directory
+      - [ ] Add variables: `CC = gcc`, `CFLAGS = -Wall -Wextra -std=c99 -Iinclude`
+      - [ ] Add targets:
+        - `all`: Build static library `lib/libpoker.a`
+        - `test`: Build and run tests
+        - `examples`: Build example programs
+        - `clean`: Remove build artifacts
+        - `install`: Install library and headers (optional)
+      - [ ] Define source files: `SRC = src/card.c src/deck.c src/evaluator.c`
+      - [ ] Define object files: `OBJ = $(SRC:src/%.c=build/%.o)`
+      - [ ] Add build rules for creating object files in `build/`
+      - [ ] Test that `make all` compiles successfully
+
+      ## Notes
+      Makefile enables reproducible builds. Using C99 standard for modern C features.
+    labels: [infrastructure]
+    milestone: "00.Project Initialization"
+
+  - title: "[00.03] Create .gitignore for C projects"
+    body: |
+      Create a `.gitignore` file to prevent committing build artifacts.
+
+      ## Acceptance Criteria
+      - [ ] Ignore object files: `*.o`
+      - [ ] Ignore compiled libraries: `*.a`, `*.so`, `*.dylib`
+      - [ ] Ignore executables: `/examples/*` (but keep .c files)
+      - [ ] Ignore build directories: `/build/`, `/lib/`
+      - [ ] Ignore test outputs: `*.out`, `/test_results/`
+      - [ ] Ignore coverage files: `*.gcda`, `*.gcno`, `*.gcov`, `/coverage/`
+      - [ ] Ignore OS-specific files (`.DS_Store`, `Thumbs.db`)
+      - [ ] Ignore IDE files (`.vscode/`, `.idea/`, `*.swp`)
+      - [ ] Verify `.gitignore` works by running `make` and checking ignored files
+
+      ## Notes
+      Keeps the repository clean and prevents accidental commits of binaries.
+    labels: [infrastructure]
+    milestone: "00.Project Initialization"
+
+  - title: "[00.04] Add MIT license"
+    body: |
+      Add MIT license to the project for open-source distribution.
+
+      ## Acceptance Criteria
+      - [ ] Create `LICENSE` file in root directory
+      - [ ] Add standard MIT license text
+      - [ ] Include copyright notice with current year and author
+      - [ ] Commit the license file
+
+      ## Notes
+      MIT is permissive and allows broad usage while providing liability protection.
+    labels: [documentation]
+    milestone: "00.Project Initialization"
+
+  - title: "[00.05] Create initial README with project vision"
+    body: |
+      Create a minimal README that describes the project vision and planned architecture.
+
+      ## Acceptance Criteria
+      - [ ] Describe project: "Texas Hold'em poker hand evaluator written in C"
+      - [ ] List planned features (5, 6, 7 card evaluation)
+      - [ ] Outline architecture phases (Foundation → Evaluation → Detection → Integration → Polish)
+      - [ ] Mention C-specific features (manual memory management, portability, performance)
+      - [ ] Keep it concise (under 30 lines)
+      - [ ] Note: "This README will be updated as each phase completes"
+
+      ## Notes
+      This is a vision document - detailed usage examples come later as features are built.
+    labels: [documentation]
+    milestone: "00.Project Initialization"
+
+  - title: "[00.06] Create project documentation structure"
+    body: |
+      Set up placeholder structure for project documentation.
+
+      ## Acceptance Criteria
+      - [ ] Verify `/docs/` folder exists (created in 00.01)
+      - [ ] Verify `/analysis/` folder exists (created in 00.01)
+      - [ ] Document that `ALGORITHM_EXPLAINED.md` will be added in Phase 05
+      - [ ] Document that `MEMORY_SAFETY.md` will be added in Phase 05
+      - [ ] Add brief note in README about future documentation
+
+      ## Notes
+      Establishes documentation structure early, content added as features complete.
+    labels: [documentation]
+    milestone: "00.Project Initialization"
+
+  # ============================================================================
+  # PHASE 01: FOUNDATION LAYER (9 tasks)
+  # ============================================================================
+
+  - title: "[01.01] Create Rank enum and type definitions"
+    body: |
+      Create the header file with Rank enum definition.
+
+      ## Acceptance Criteria
+      - [ ] Create `include/poker.h` header file
+      - [ ] Add header guards:
+        ```c
+        #ifndef POKER_H
+        #define POKER_H
+        // ...
+        #endif
+        ```
+      - [ ] Define Rank enum:
+        ```c
+        typedef enum {
+            RANK_TWO = 2,
+            RANK_THREE = 3,
+            RANK_FOUR = 4,
+            RANK_FIVE = 5,
+            RANK_SIX = 6,
+            RANK_SEVEN = 7,
+            RANK_EIGHT = 8,
+            RANK_NINE = 9,
+            RANK_TEN = 10,
+            RANK_JACK = 11,
+            RANK_QUEEN = 12,
+            RANK_KING = 13,
+            RANK_ACE = 14
+        } Rank;
+        ```
+      - [ ] Write tests verifying rank values
+      - [ ] Test ordering: `RANK_TWO < RANK_THREE < ... < RANK_ACE`
+
+      ## Notes
+      Using `RANK_` prefix to avoid naming conflicts. Explicit values enable direct comparison.
+    labels: [algorithm, good first issue]
+    milestone: "01.Foundation Layer"
+
+  - title: "[01.02] Add Suit enum and Card struct"
+    body: |
+      Add Suit enum and complete the Card struct definition.
+
+      ## Acceptance Criteria
+      - [ ] Add Suit enum to `include/poker.h`:
+        ```c
+        typedef enum {
+            SUIT_HEARTS,
+            SUIT_DIAMONDS,
+            SUIT_CLUBS,
+            SUIT_SPADES
+        } Suit;
+        ```
+      - [ ] Define Card struct:
+        ```c
+        typedef struct {
+            Rank rank;
+            Suit suit;
+        } Card;
+        ```
+      - [ ] Write tests creating cards with all rank+suit combinations
+      - [ ] Verify all 52 unique cards can be represented
+      - [ ] Verify sizeof(Card) is small (2 bytes expected)
+
+      ## Notes
+      Simple struct with two enum fields. Card is small enough to pass by value efficiently.
+    labels: [algorithm, good first issue]
+    milestone: "01.Foundation Layer"
+
+  - title: "[01.03] Implement card_to_string function"
+    body: |
+      Create function to convert Card to string representation.
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Convert card to string representation (e.g., "Ah", "Td")
+         * @param card The card to convert
+         * @param buffer Output buffer (must be at least 3 bytes)
+         * @param size Size of output buffer
+         * @return 0 on success, -1 on error
+         */
+        int card_to_string(Card card, char* buffer, size_t size);
+        ```
+      - [ ] Create `src/card.c` implementation file
+      - [ ] Map ranks: 2-9 → "2"-"9", 10 → "T", J/Q/K/A → "J"/"Q"/"K"/"A"
+      - [ ] Map suits: Hearts → "h", Diamonds → "d", Clubs → "c", Spades → "s"
+      - [ ] Use `snprintf()` to prevent buffer overflow
+      - [ ] Return -1 if buffer too small (size < 3)
+      - [ ] Write tests for all 52 card string representations
+      - [ ] Test buffer overflow protection
+
+      ## Notes
+      Using output parameter pattern. Buffer must be caller-allocated.
+    labels: [algorithm, good first issue]
+    milestone: "01.Foundation Layer"
+
+  - title: "[01.04] Implement parse_card function"
+    body: |
+      Create function to parse string into Card struct.
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Parse string into Card struct
+         * @param str Input string (e.g., "Ah", "Td")
+         * @param out_card Pointer to Card to receive result
+         * @return 0 on success, -1 on error
+         */
+        int parse_card(const char* str, Card* out_card);
+        ```
+      - [ ] Implement in `src/card.c`
+      - [ ] Parse rank characters: '2'-'9', 'T'/'t', 'J'/'j', 'Q'/'q', 'K'/'k', 'A'/'a'
+      - [ ] Parse suit characters: 'h'/'H', 'd'/'D', 'c'/'C', 's'/'S'
+      - [ ] Return -1 for invalid input (wrong length, invalid characters, NULL pointers)
+      - [ ] Write tests for valid parsing
+      - [ ] Write tests for error cases (NULL pointer, invalid string, etc.)
+      - [ ] Test bidirectional conversion: parse → to_string → parse
+
+      ## Notes
+      Return code pattern for error handling. Validate all inputs.
+    labels: [algorithm, good first issue]
+    milestone: "01.Foundation Layer"
+
+  - title: "[01.05] Create Deck struct and deck_new function"
+    body: |
+      Create the Deck structure with dynamic allocation.
+
+      ## Acceptance Criteria
+      - [ ] Add Deck struct to `include/poker.h`:
+        ```c
+        typedef struct {
+            Card* cards;     // Dynamic array of cards
+            size_t size;     // Current number of cards
+            size_t capacity; // Allocated capacity
+        } Deck;
+        ```
+      - [ ] Add declaration:
+        ```c
+        /**
+         * @brief Create new deck with 52 cards
+         * @return Pointer to new Deck, or NULL on allocation failure
+         */
+        Deck* deck_new(void);
+        ```
+      - [ ] Create `src/deck.c` implementation
+      - [ ] Allocate Deck with `malloc(sizeof(Deck))`
+      - [ ] Allocate cards array with `malloc(52 * sizeof(Card))`
+      - [ ] Generate all 52 cards (4 suits × 13 ranks)
+      - [ ] Set size = 52, capacity = 52
+      - [ ] Return NULL on allocation failure
+      - [ ] Write tests verifying deck has exactly 52 cards
+      - [ ] Write tests verifying all cards are unique
+
+      ## Notes
+      Heap allocation using malloc. Caller must call deck_free() when done.
+    labels: [algorithm]
+    milestone: "01.Foundation Layer"
+
+  - title: "[01.06] Implement deck_shuffle function"
+    body: |
+      Add shuffle method using Fisher-Yates algorithm.
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Shuffle deck using Fisher-Yates algorithm
+         * @param deck Deck to shuffle
+         */
+        void deck_shuffle(Deck* deck);
+        ```
+      - [ ] Implement in `src/deck.c`
+      - [ ] Use Fisher-Yates algorithm
+      - [ ] Use `rand()` for randomness
+      - [ ] Modify deck in-place
+      - [ ] Write tests verifying shuffled deck still has 52 unique cards
+      - [ ] Write tests verifying order changes after shuffle
+      - [ ] Document that caller should call `srand(time(NULL))` before shuffling
+
+      ## Notes
+      Uses stdlib rand(). Caller responsible for seeding with srand().
+    labels: [algorithm]
+    milestone: "01.Foundation Layer"
+
+  - title: "[01.07] Implement deck_deal function"
+    body: |
+      Create function to deal cards from deck.
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Deal cards from deck
+         * @param deck Deck to deal from
+         * @param out_cards Output array for dealt cards (caller-allocated)
+         * @param n Number of cards to deal
+         * @return Actual number of cards dealt (may be less if not enough cards)
+         */
+        size_t deck_deal(Deck* deck, Card* out_cards, size_t n);
+        ```
+      - [ ] Implement in `src/deck.c`
+      - [ ] Copy cards from deck to out_cards using `memcpy()`
+      - [ ] Reduce deck size by number of cards dealt
+      - [ ] Handle edge case: dealing more cards than available (return actual count)
+      - [ ] Write tests verifying deck size decreases correctly
+      - [ ] Write tests for edge cases (deal 0, deal 52, deal 53)
+
+      ## Notes
+      Output array must be caller-allocated. Returns actual count dealt.
+    labels: [algorithm]
+    milestone: "01.Foundation Layer"
+
+  - title: "[01.08] Implement deck_free function"
+    body: |
+      Add cleanup function to deallocate deck memory.
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Free deck memory
+         * @param deck Deck to free (can be NULL)
+         */
+        void deck_free(Deck* deck);
+        ```
+      - [ ] Implement in `src/deck.c`:
+        ```c
+        void deck_free(Deck* deck) {
+            if (deck != NULL) {
+                free(deck->cards);
+                free(deck);
+            }
+        }
+        ```
+      - [ ] Handle NULL pointer gracefully
+      - [ ] Free cards array first, then Deck struct
+      - [ ] Write tests verifying no memory leaks (use Valgrind)
+      - [ ] Document that deck pointer is invalid after calling this
+
+      ## Notes
+      Critical for preventing memory leaks. Every deck_new() must have matching deck_free().
+    labels: [algorithm]
+    milestone: "01.Foundation Layer"
+
+  - title: "[01.09] Update README with Phase 01 completion"
+    body: |
+      Update README to document the completed Foundation Layer.
+
+      ## Acceptance Criteria
+      - [ ] Add section: "## Foundation Layer"
+      - [ ] Document `Rank` and `Suit` enums
+      - [ ] Document `Card` struct
+      - [ ] Document functions: `card_to_string()`, `parse_card()`
+      - [ ] Document `Deck` struct and functions: `deck_new()`, `deck_shuffle()`, `deck_deal()`, `deck_free()`
+      - [ ] Add usage example:
+        ```c
+        #include "poker.h"
+        #include <stdio.h>
+        #include <stdlib.h>
+        #include <time.h>
+
+        int main() {
+            srand(time(NULL));
+            Deck* deck = deck_new();
+            deck_shuffle(deck);
+
+            Card hand[5];
+            deck_deal(deck, hand, 5);
+
+            // Print cards...
+
+            deck_free(deck);
+            return 0;
+        }
+        ```
+      - [ ] Emphasize memory management (always call deck_free)
+      - [ ] Keep examples concise (10-15 lines of code)
+
+      ## Notes
+      README now documents the working foundation - users can create and manipulate decks.
+    labels: [documentation]
+    milestone: "01.Foundation Layer"
+
+  # ============================================================================
+  # PHASE 02: EVALUATION CORE (6 tasks)
+  # ============================================================================
+
+  - title: "[02.01] Create HandCategory enum"
+    body: |
+      Add enum for poker hand categories.
+
+      ## Acceptance Criteria
+      - [ ] Add to `include/poker.h`:
+        ```c
+        typedef enum {
+            HAND_HIGH_CARD = 1,
+            HAND_ONE_PAIR = 2,
+            HAND_TWO_PAIR = 3,
+            HAND_THREE_OF_A_KIND = 4,
+            HAND_STRAIGHT = 5,
+            HAND_FLUSH = 6,
+            HAND_FULL_HOUSE = 7,
+            HAND_FOUR_OF_A_KIND = 8,
+            HAND_STRAIGHT_FLUSH = 9,
+            HAND_ROYAL_FLUSH = 10
+        } HandCategory;
+        ```
+      - [ ] Write tests verifying ordering: `HAND_ROYAL_FLUSH > HAND_FLUSH`
+      - [ ] Verify explicit values allow direct comparison
+
+      ## Notes
+      Explicit discriminants enable numeric comparison. Using `HAND_` prefix.
+    labels: [algorithm]
+    milestone: "02.Evaluation Core"
+
+  - title: "[02.02] Create Hand struct"
+    body: |
+      Define Hand struct to represent evaluated poker hands.
+
+      ## Acceptance Criteria
+      - [ ] Add to `include/poker.h`:
+        ```c
+        #define MAX_TIEBREAKERS 5
+
+        typedef struct {
+            Card cards[5];              // Fixed-size array (exactly 5 cards)
+            HandCategory category;       // Hand type
+            Rank tiebreakers[MAX_TIEBREAKERS]; // Ranks for tiebreaking
+            size_t num_tiebreakers;     // Number of valid tiebreakers
+        } Hand;
+        ```
+      - [ ] Document that `cards` contains exactly 5 cards
+      - [ ] Document that `category` identifies the hand type
+      - [ ] Document that `tiebreakers` contains ranks in descending importance order
+      - [ ] Write tests creating hands with different categories
+
+      ## Notes
+      Using fixed-size arrays to avoid dynamic allocation. Track tiebreaker count explicitly.
+    labels: [algorithm]
+    milestone: "02.Evaluation Core"
+
+  - title: "[02.03] Implement is_flush helper function"
+    body: |
+      Create helper to detect if all 5 cards are the same suit.
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Check if all cards are the same suit
+         * @param cards Array of cards
+         * @param len Number of cards (must be 5)
+         * @return 1 if flush, 0 otherwise
+         */
+        int is_flush(const Card* cards, size_t len);
+        ```
+      - [ ] Create `src/evaluator.c` implementation
+      - [ ] Return 0 if len != 5
+      - [ ] Check all cards have same suit as first card
+      - [ ] Return 1 if all match, 0 otherwise
+      - [ ] Write tests with flush hands (all same suit)
+      - [ ] Write tests with non-flush hands (mixed suits)
+
+      ## Notes
+      Simple comparison loop. Using const for read-only parameter.
+    labels: [algorithm, good first issue]
+    milestone: "02.Evaluation Core"
+
+  - title: "[02.04] Implement is_straight helper function"
+    body: |
+      Create helper to detect if 5 cards form a sequence.
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Check if cards form a straight
+         * @param cards Array of cards
+         * @param len Number of cards (must be 5)
+         * @param out_high_card Pointer to receive high card rank (can be NULL)
+         * @return 1 if straight, 0 otherwise
+         */
+        int is_straight(const Card* cards, size_t len, Rank* out_high_card);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Extract ranks into array: `Rank ranks[5]`
+      - [ ] Sort ranks descending using `qsort()` with custom comparator:
+        ```c
+        static int rank_compare_desc(const void* a, const void* b) {
+            return (*(Rank*)b) - (*(Rank*)a);
+        }
+        ```
+      - [ ] Check for wheel straight: A-2-3-4-5 → return high card = RANK_FIVE
+      - [ ] Check for regular straight: each rank = previous - 1
+      - [ ] Write high card to `out_high_card` if provided
+      - [ ] Write tests for regular straights (e.g., 9-8-7-6-5)
+      - [ ] Write tests for wheel straight (A-2-3-4-5)
+      - [ ] Write tests for non-straights
+
+      ## Notes
+      Using qsort() from stdlib. Output parameter for high card.
+    labels: [algorithm]
+    milestone: "02.Evaluation Core"
+
+  - title: "[02.05] Implement rank_counts helper function"
+    body: |
+      Create helper to count rank frequencies.
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Count frequency of each rank
+         * @param cards Array of cards
+         * @param len Number of cards
+         * @param counts Output array[15] to receive counts (indexed by Rank)
+         */
+        void rank_counts(const Card* cards, size_t len, int* counts);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Initialize counts array to zero: `memset(counts, 0, 15 * sizeof(int))`
+      - [ ] Loop through cards and increment: `counts[card.rank]++`
+      - [ ] Write tests for various distributions:
+        - Four of a kind: `counts[RANK_ACE] == 4, counts[RANK_KING] == 1`
+        - Full house: `counts[RANK_QUEEN] == 3, counts[RANK_JACK] == 2`
+
+      ## Notes
+      Using array indexed by Rank (0-14). Caller must provide array[15].
+    labels: [algorithm, good first issue]
+    milestone: "02.Evaluation Core"
+
+  - title: "[02.06] Update README with Phase 02 completion"
+    body: |
+      Update README to document the Evaluation Core.
+
+      ## Acceptance Criteria
+      - [ ] Add section: "## Evaluation Core"
+      - [ ] Document `HandCategory` enum with all 10 categories
+      - [ ] Document `Hand` struct fields (cards, category, tiebreakers, num_tiebreakers)
+      - [ ] Document helper functions: `is_flush()`, `is_straight()`, `rank_counts()`
+      - [ ] Explain wheel straight special case (A-2-3-4-5)
+      - [ ] Mention using qsort() for sorting
+      - [ ] Explain array-based rank counting (not HashMap)
+      - [ ] Add brief explanation of evaluation architecture
+
+      ## Notes
+      README now explains the evaluation system architecture before detection logic.
+    labels: [documentation]
+    milestone: "02.Evaluation Core"
+
+  # ============================================================================
+  # PHASE 03: DETECTION LAYER (11 tasks)
+  # ============================================================================
+
+  - title: "[03.01] Implement detect_royal_flush function"
+    body: |
+      Create detector for royal flush (10-J-Q-K-A all same suit).
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Detect royal flush
+         * @param cards Array of exactly 5 cards
+         * @param len Must be 5
+         * @return 1 if royal flush, 0 otherwise
+         */
+        int detect_royal_flush(const Card* cards, size_t len);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Use `is_flush()` to verify all same suit
+      - [ ] Check for exact ranks: TEN, JACK, QUEEN, KING, ACE
+      - [ ] Return 0 if not royal flush
+      - [ ] Write tests for royal flush (all suits)
+      - [ ] Write tests for non-royal flushes
+
+      ## Notes
+      Royal flush is the strongest hand - no tiebreakers needed.
+    labels: [algorithm]
+    milestone: "03.Detection Layer"
+
+  - title: "[03.02] Implement detect_straight_flush function"
+    body: |
+      Create detector for straight flush (5 sequential suited cards).
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Detect straight flush
+         * @param cards Array of exactly 5 cards
+         * @param len Must be 5
+         * @param out_high_card Pointer to receive high card rank (can be NULL)
+         * @return 1 if straight flush, 0 otherwise
+         */
+        int detect_straight_flush(const Card* cards, size_t len, Rank* out_high_card);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Use `is_flush()` to verify all same suit
+      - [ ] Use `is_straight()` to verify sequential ranks
+      - [ ] Return 0 if not both flush and straight
+      - [ ] Write high card to output parameter if provided
+      - [ ] Returns high card = RANK_FIVE for wheel straight flush
+      - [ ] Write tests for 9-high straight flush
+      - [ ] Write tests for wheel straight flush (A-2-3-4-5 suited)
+
+      ## Notes
+      Combines is_flush and is_straight. Returns high card for tiebreakers.
+    labels: [algorithm]
+    milestone: "03.Detection Layer"
+
+  - title: "[03.03] Implement detect_four_of_a_kind function"
+    body: |
+      Create detector for four of a kind (4 cards of same rank).
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Detect four of a kind
+         * @param cards Array of exactly 5 cards
+         * @param len Must be 5
+         * @param counts Optional pre-computed rank counts (can be NULL)
+         * @param out_tiebreakers Output array for tiebreaker ranks
+         * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+         * @return 1 if four of a kind, 0 otherwise
+         */
+        int detect_four_of_a_kind(const Card* cards, size_t len,
+                                   const int* counts,
+                                   Rank* out_tiebreakers,
+                                   size_t* out_num_tiebreakers);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] If counts is NULL, compute using `rank_counts()`
+      - [ ] Loop through counts to find rank with count == 4 (quad rank)
+      - [ ] Find rank with count == 1 (kicker)
+      - [ ] Return 0 if no quad found
+      - [ ] Write tiebreakers: `[quad_rank, kicker]`
+      - [ ] Set `*out_num_tiebreakers = 2`
+      - [ ] Write tests for various quads
+
+      ## Notes
+      Optional counts parameter (NULL if not cached). Tiebreakers: [quad, kicker].
+    labels: [algorithm]
+    milestone: "03.Detection Layer"
+
+  - title: "[03.04] Implement detect_full_house function"
+    body: |
+      Create detector for full house (3 of a kind + pair).
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Detect full house
+         * @param cards Array of exactly 5 cards
+         * @param len Must be 5
+         * @param counts Optional pre-computed rank counts (can be NULL)
+         * @param out_tiebreakers Output array for tiebreaker ranks
+         * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+         * @return 1 if full house, 0 otherwise
+         */
+        int detect_full_house(const Card* cards, size_t len,
+                              const int* counts,
+                              Rank* out_tiebreakers,
+                              size_t* out_num_tiebreakers);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Find rank with count == 3 (trip)
+      - [ ] Find rank with count == 2 (pair)
+      - [ ] Return 0 if not both found
+      - [ ] Write tiebreakers: `[trip_rank, pair_rank]`
+      - [ ] Set `*out_num_tiebreakers = 2`
+      - [ ] Write tests for various full houses
+
+      ## Notes
+      Full house always has exactly one trip and one pair in a 5-card hand.
+    labels: [algorithm]
+    milestone: "03.Detection Layer"
+
+  - title: "[03.05] Implement detect_flush function"
+    body: |
+      Create detector for flush (5 suited cards, not sequential).
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Detect flush (non-straight)
+         * @param cards Array of exactly 5 cards
+         * @param len Must be 5
+         * @param out_tiebreakers Output array for tiebreaker ranks
+         * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+         * @return 1 if flush, 0 otherwise
+         */
+        int detect_flush(const Card* cards, size_t len,
+                         Rank* out_tiebreakers,
+                         size_t* out_num_tiebreakers);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Use `is_flush()` to verify all same suit
+      - [ ] Use `is_straight()` to exclude straight flushes (return 0 if straight)
+      - [ ] Extract ranks into array, sort descending with qsort
+      - [ ] Write all 5 ranks to tiebreakers
+      - [ ] Set `*out_num_tiebreakers = 5`
+      - [ ] Write tests for flushes (non-sequential)
+
+      ## Notes
+      Returns all 5 ranks as tiebreakers. Must exclude straight flushes.
+    labels: [algorithm]
+    milestone: "03.Detection Layer"
+
+  - title: "[03.06] Implement detect_straight function"
+    body: |
+      Create detector for straight (5 sequential cards, mixed suits).
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Detect straight (non-flush)
+         * @param cards Array of exactly 5 cards
+         * @param len Must be 5
+         * @param out_tiebreakers Output array for tiebreaker ranks
+         * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+         * @return 1 if straight, 0 otherwise
+         */
+        int detect_straight(const Card* cards, size_t len,
+                            Rank* out_tiebreakers,
+                            size_t* out_num_tiebreakers);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Use `is_flush()` - return 0 if flush (exclude straight flushes)
+      - [ ] Use `is_straight()` to detect sequential ranks
+      - [ ] Write high card to tiebreakers[0]
+      - [ ] Set `*out_num_tiebreakers = 1`
+      - [ ] Write tests for mixed-suit straights
+      - [ ] Write tests for wheel straight (A-2-3-4-5)
+
+      ## Notes
+      Plain straights must exclude straight flushes. Tiebreaker: [high_card].
+    labels: [algorithm]
+    milestone: "03.Detection Layer"
+
+  - title: "[03.07] Implement detect_three_of_a_kind function"
+    body: |
+      Create detector for three of a kind (3 cards of same rank, no pair).
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Detect three of a kind (no pair)
+         * @param cards Array of exactly 5 cards
+         * @param len Must be 5
+         * @param counts Optional pre-computed rank counts (can be NULL)
+         * @param out_tiebreakers Output array for tiebreaker ranks
+         * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+         * @return 1 if three of a kind, 0 otherwise
+         */
+        int detect_three_of_a_kind(const Card* cards, size_t len,
+                                    const int* counts,
+                                    Rank* out_tiebreakers,
+                                    size_t* out_num_tiebreakers);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Find rank with count == 3 (trip)
+      - [ ] Find exactly 2 ranks with count == 1 (kickers)
+      - [ ] Return 0 if full house detected (count == 2 exists)
+      - [ ] Sort kickers descending
+      - [ ] Write tiebreakers: `[trip_rank, kicker1, kicker2]`
+      - [ ] Set `*out_num_tiebreakers = 3`
+      - [ ] Write tests for three of a kind
+
+      ## Notes
+      Must exclude full houses (trip + pair). Returns trip + 2 kickers.
+    labels: [algorithm]
+    milestone: "03.Detection Layer"
+
+  - title: "[03.08] Implement detect_two_pair function"
+    body: |
+      Create detector for two pair (2 ranks with 2 cards each).
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Detect two pair
+         * @param cards Array of exactly 5 cards
+         * @param len Must be 5
+         * @param counts Optional pre-computed rank counts (can be NULL)
+         * @param out_tiebreakers Output array for tiebreaker ranks
+         * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+         * @return 1 if two pair, 0 otherwise
+         */
+        int detect_two_pair(const Card* cards, size_t len,
+                            const int* counts,
+                            Rank* out_tiebreakers,
+                            size_t* out_num_tiebreakers);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Find exactly 2 ranks with count == 2 (pairs)
+      - [ ] Return 0 if trips/quads detected (count >= 3 exists)
+      - [ ] Sort pairs descending (high pair first)
+      - [ ] Find kicker (count == 1)
+      - [ ] Write tiebreakers: `[high_pair, low_pair, kicker]`
+      - [ ] Set `*out_num_tiebreakers = 3`
+      - [ ] Write tests for two pair
+
+      ## Notes
+      High pair comes first in tiebreakers. Must exclude full houses.
+    labels: [algorithm]
+    milestone: "03.Detection Layer"
+
+  - title: "[03.09] Implement detect_one_pair function"
+    body: |
+      Create detector for one pair (exactly 1 rank with 2 cards).
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Detect one pair
+         * @param cards Array of exactly 5 cards
+         * @param len Must be 5
+         * @param counts Optional pre-computed rank counts (can be NULL)
+         * @param out_tiebreakers Output array for tiebreaker ranks
+         * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+         * @return 1 if one pair, 0 otherwise
+         */
+        int detect_one_pair(const Card* cards, size_t len,
+                            const int* counts,
+                            Rank* out_tiebreakers,
+                            size_t* out_num_tiebreakers);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Find exactly 1 rank with count == 2 (pair)
+      - [ ] Return 0 if two pair, trips, or quads detected
+      - [ ] Find 3 kickers (count == 1)
+      - [ ] Sort kickers descending
+      - [ ] Write tiebreakers: `[pair_rank, k1, k2, k3]`
+      - [ ] Set `*out_num_tiebreakers = 4`
+      - [ ] Write tests for one pair
+
+      ## Notes
+      Returns pair rank followed by 3 kickers in descending order.
+    labels: [algorithm]
+    milestone: "03.Detection Layer"
+
+  - title: "[03.10] Implement detect_high_card function"
+    body: |
+      Create detector for high card (fallback when no other category matches).
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Detect high card (always succeeds for valid input)
+         * @param cards Array of exactly 5 cards
+         * @param len Must be 5
+         * @param out_tiebreakers Output array for tiebreaker ranks
+         * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+         * @return 1 if valid 5-card input, 0 otherwise
+         */
+        int detect_high_card(const Card* cards, size_t len,
+                             Rank* out_tiebreakers,
+                             size_t* out_num_tiebreakers);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Return 0 if len != 5
+      - [ ] Extract ranks into array
+      - [ ] Sort ranks descending using qsort
+      - [ ] Write all 5 ranks to tiebreakers
+      - [ ] Set `*out_num_tiebreakers = 5`
+      - [ ] Write tests verifying all 5 ranks returned in correct order
+
+      ## Notes
+      High card is the weakest hand - always succeeds as fallback.
+    labels: [algorithm, good first issue]
+    milestone: "03.Detection Layer"
+
+  - title: "[03.11] Update README with Phase 03 completion"
+    body: |
+      Update README to document all 10 hand detection functions.
+
+      ## Acceptance Criteria
+      - [ ] Add section: "## Detection Layer"
+      - [ ] Document all 10 detector functions with signatures
+      - [ ] Explain return codes (1 = detected, 0 = not detected)
+      - [ ] Explain output parameters for tiebreakers
+      - [ ] Explain tiebreaker format for each category:
+        - Royal Flush: no tiebreakers (returns 1/0 only)
+        - Straight Flush: [high_card]
+        - Four of a Kind: [quad_rank, kicker]
+        - Full House: [trip_rank, pair_rank]
+        - Flush: [r1, r2, r3, r4, r5]
+        - Straight: [high_card]
+        - Three of a Kind: [trip_rank, k1, k2]
+        - Two Pair: [high_pair, low_pair, kicker]
+        - One Pair: [pair_rank, k1, k2, k3]
+        - High Card: [r1, r2, r3, r4, r5]
+      - [ ] Explain wheel straight special case
+      - [ ] Mention using qsort() for sorting
+
+      ## Notes
+      README now documents complete detection system with C-style output parameters.
+    labels: [documentation]
+    milestone: "03.Detection Layer"
+
+  # ============================================================================
+  # PHASE 04: INTEGRATION LAYER (5 tasks)
+  # ============================================================================
+
+  - title: "[04.01] Implement evaluate_hand function"
+    body: |
+      Create the main evaluation function that orchestrates all detectors.
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Evaluate a 5-card poker hand
+         * @param cards Array of exactly 5 cards
+         * @param len Must be 5
+         * @param out_hand Pointer to Hand struct to receive result
+         * @return 0 on success, -1 on error
+         */
+        int evaluate_hand(const Card* cards, size_t len, Hand* out_hand);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Return -1 if len != 5 or cards/out_hand is NULL
+      - [ ] Precompute rank_counts once: `int counts[15]`
+      - [ ] Check detectors in order: royal_flush → straight_flush → ... → high_card
+      - [ ] Copy cards to out_hand->cards using memcpy
+      - [ ] Set out_hand->category and copy tiebreakers
+      - [ ] Write tests for all 10 hand categories
+      - [ ] Verify correct category detection and tiebreakers
+
+      ## Notes
+      Optimization: compute rank_counts once, pass to detectors. First match wins.
+    labels: [algorithm]
+    milestone: "04.Integration Layer"
+
+  - title: "[04.02] Implement manual combination generation"
+    body: |
+      Create helper function to generate 5-card combinations from 6 or 7 cards.
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Generate all 5-card combinations from N cards
+         * @param cards Input cards
+         * @param n Number of input cards (5, 6, or 7)
+         * @param out_combinations Output array for combinations
+         * @param out_count Pointer to receive number of combinations
+         * @return 0 on success, -1 on error
+         */
+        int generate_combinations(const Card* cards, size_t n,
+                                  Card (*out_combinations)[5],
+                                  size_t* out_count);
+        ```
+      - [ ] Implement in `src/evaluator.c` using nested loops:
+        - 5 cards: 1 combination (identity)
+        - 6 cards: 6 combinations (C(6,5))
+        - 7 cards: 21 combinations (C(7,5))
+      - [ ] Use 5 nested loops for C(7,5) (manageable for small N)
+      - [ ] Write each combination to out_combinations array
+      - [ ] Set *out_count to number of combinations generated
+      - [ ] Write tests verifying combination count
+      - [ ] Write tests verifying all combinations are unique
+
+      ## Notes
+      Manual nested loops - no external library needed. Fixed small N makes this feasible.
+    labels: [algorithm]
+    milestone: "04.Integration Layer"
+
+  - title: "[04.03] Implement compare_hands function"
+    body: |
+      Create hand comparison function for determining winners.
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Compare two hands
+         * @param h1 First hand
+         * @param h2 Second hand
+         * @return 1 if h1 wins, -1 if h2 wins, 0 if tie
+         */
+        int compare_hands(const Hand* h1, const Hand* h2);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Compare category first:
+        ```c
+        if (h1->category > h2->category) return 1;
+        if (h1->category < h2->category) return -1;
+        ```
+      - [ ] If same category, compare tiebreakers element-by-element:
+        ```c
+        for (size_t i = 0; i < min(h1->num_tiebreakers, h2->num_tiebreakers); i++) {
+            if (h1->tiebreakers[i] > h2->tiebreakers[i]) return 1;
+            if (h1->tiebreakers[i] < h2->tiebreakers[i]) return -1;
+        }
+        return 0; // Exact tie
+        ```
+      - [ ] Write tests for category comparison (Flush vs Straight)
+      - [ ] Write tests for tiebreaker comparison
+      - [ ] Write tests for exact ties
+
+      ## Notes
+      Standard comparison: category first, then tiebreakers.
+    labels: [algorithm]
+    milestone: "04.Integration Layer"
+
+  - title: "[04.04] Implement find_best_hand function"
+    body: |
+      Create best hand finder for 5, 6, or 7 card inputs.
+
+      ## Acceptance Criteria
+      - [ ] Add declaration to `include/poker.h`:
+        ```c
+        /**
+         * @brief Find best 5-card hand from N cards (5, 6, or 7)
+         * @param cards Input cards
+         * @param n Number of input cards
+         * @param out_best Pointer to Hand to receive best hand
+         * @return 0 on success, -1 on error
+         */
+        int find_best_hand(const Card* cards, size_t n, Hand* out_best);
+        ```
+      - [ ] Implement in `src/evaluator.c`
+      - [ ] Return -1 if n < 5 or n > 7
+      - [ ] Optimization: if n == 5, call evaluate_hand directly
+      - [ ] Generate all combinations using generate_combinations
+      - [ ] Evaluate each combination
+      - [ ] Track best hand using compare_hands
+      - [ ] Write tests with 5 cards (direct evaluation)
+      - [ ] Write tests with 6 cards (6 combinations)
+      - [ ] Write tests with 7 cards (21 combinations)
+
+      ## Notes
+      Manual loop to find best hand. No automatic max() function in C.
+    labels: [algorithm]
+    milestone: "04.Integration Layer"
+
+  - title: "[04.05] Update README with Phase 04 completion"
+    body: |
+      Update README to document the complete evaluation workflow.
+
+      ## Acceptance Criteria
+      - [ ] Add section: "## Integration Layer"
+      - [ ] Document `evaluate_hand()` function
+      - [ ] Document `compare_hands()` function (returns -1/0/1)
+      - [ ] Document `find_best_hand()` function
+      - [ ] Add full usage example:
+        ```c
+        #include "poker.h"
+        #include <stdio.h>
+        #include <stdlib.h>
+        #include <time.h>
+
+        int main() {
+            srand(time(NULL));
+            Deck* deck = deck_new();
+            deck_shuffle(deck);
+
+            Card cards[7];
+            deck_deal(deck, cards, 7);
+
+            Hand best;
+            if (find_best_hand(cards, 7, &best) == 0) {
+                printf("Best hand category: %d\n", best.category);
+            }
+
+            deck_free(deck);
+            return 0;
+        }
+        ```
+      - [ ] Explain evaluation workflow: input → combinations → evaluate → compare
+
+      ## Notes
+      README now documents complete API for hand evaluation.
+    labels: [documentation]
+    milestone: "04.Integration Layer"
+
+  # ============================================================================
+  # PHASE 05: EXAMPLES & POLISH (9 tasks)
+  # ============================================================================
+
+  - title: "[05.01] Create poker_game.c example program"
+    body: |
+      Create example application demonstrating the hand evaluator.
+
+      ## Acceptance Criteria
+      - [ ] Create `examples/poker_game.c`
+      - [ ] Include poker.h header
+      - [ ] Implement main() function:
+        - Initialize random seed: `srand(time(NULL))`
+        - Create deck: `Deck* deck = deck_new()`
+        - Shuffle deck
+        - Deal two 7-card hands
+        - Find best hand for each using `find_best_hand()`
+        - Compare hands using `compare_hands()`
+        - Print results (categories and winner)
+        - Clean up: `deck_free(deck)`
+      - [ ] Add to Makefile: `examples: examples/poker_game`
+      - [ ] Compile with: `gcc -o examples/poker_game examples/poker_game.c -Iinclude -Llib -lpoker`
+      - [ ] Test runs successfully
+
+      ## Notes
+      Demonstrates complete workflow from deck creation to hand comparison.
+    labels: [documentation]
+    milestone: "05.Examples & Polish"
+
+  - title: "[05.02] Add Unity test framework"
+    body: |
+      Integrate Unity testing framework for unit tests.
+
+      ## Acceptance Criteria
+      - [ ] Download Unity framework (unity.c, unity.h) to `tests/` directory
+      - [ ] Create `tests/test_card.c` for card-related tests
+      - [ ] Create `tests/test_deck.c` for deck-related tests
+      - [ ] Create `tests/test_evaluator.c` for evaluation tests
+      - [ ] Write tests using Unity macros:
+        ```c
+        #include "unity.h"
+        #include "poker.h"
+
+        void test_card_to_string(void) {
+            Card card = {RANK_ACE, SUIT_HEARTS};
+            char buffer[3];
+            TEST_ASSERT_EQUAL(0, card_to_string(card, buffer, 3));
+            TEST_ASSERT_EQUAL_STRING("Ah", buffer);
+        }
+        ```
+      - [ ] Add test target to Makefile
+      - [ ] Run tests with: `make test`
+      - [ ] Cover all edge cases
+
+      ## Notes
+      Unity is a lightweight C test framework. Perfect for embedded/portable C.
+    labels: [testing]
+    milestone: "05.Examples & Polish"
+
+  - title: "[05.03] Add manual benchmarking"
+    body: |
+      Create benchmarking program using clock() for performance measurement.
+
+      ## Acceptance Criteria
+      - [ ] Create `examples/benchmark.c`
+      - [ ] Use `clock()` to measure execution time:
+        ```c
+        #include <time.h>
+        clock_t start = clock();
+        // ... code to benchmark ...
+        clock_t end = clock();
+        double time_ms = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+        ```
+      - [ ] Benchmark evaluate_hand (run 10,000 times)
+      - [ ] Benchmark find_best_hand with 7 cards (run 1,000 times)
+      - [ ] Print results in ms/iteration
+      - [ ] Add to Makefile: `benchmark` target
+      - [ ] Document baseline performance
+
+      ## Notes
+      Simple timing using stdlib. For more precise timing, could use gettimeofday().
+    labels: [performance, testing]
+    milestone: "05.Examples & Polish"
+
+  - title: "[05.04] Verify standard C project layout"
+    body: |
+      Verify code follows standard C project layout.
+
+      ## Acceptance Criteria
+      - [ ] Verify header files in `include/`
+      - [ ] Verify implementation files in `src/`
+      - [ ] Verify examples in `examples/`
+      - [ ] Verify tests in `tests/`
+      - [ ] Run `make all` successfully
+      - [ ] Run `make test` successfully
+      - [ ] Run `make examples` successfully
+      - [ ] Verify `lib/libpoker.a` is created
+      - [ ] Verify Makefile is correct
+
+      ## Notes
+      Standard C layout was established in Phase 00. This verifies everything works.
+    labels: [refactoring]
+    milestone: "05.Examples & Polish"
+
+  - title: "[05.05] Add Valgrind memory leak checks"
+    body: |
+      Use Valgrind to detect memory leaks and errors.
+
+      ## Acceptance Criteria
+      - [ ] Install Valgrind: `sudo apt install valgrind` (Linux)
+      - [ ] Add Makefile target:
+        ```makefile
+        valgrind: test
+            valgrind --leak-check=full --show-leak-kinds=all ./test_runner
+        ```
+      - [ ] Run Valgrind on all tests: `make valgrind`
+      - [ ] Fix all memory leaks (all allocations must have matching free)
+      - [ ] Verify output shows: "All heap blocks were freed -- no leaks are possible"
+      - [ ] Run Valgrind on examples: `valgrind ./examples/poker_game`
+      - [ ] Document Valgrind usage in README
+
+      ## Notes
+      **CRITICAL**: Memory safety is paramount in C. Valgrind catches leaks and errors.
+    labels: [testing]
+    milestone: "05.Examples & Polish"
+
+  - title: "[05.06] Consolidate tests and improve coverage"
+    body: |
+      Review and consolidate test suite.
+
+      ## Acceptance Criteria
+      - [ ] Identify duplicate or redundant test cases
+      - [ ] Consolidate similar tests using parameterized approach:
+        ```c
+        typedef struct {
+            Card cards[5];
+            int expected_result;
+        } TestCase;
+
+        void test_straight_cases(void) {
+            TestCase cases[] = {
+                { { /* 9-high straight */ }, 1 },
+                { { /* wheel */ }, 1 },
+                { { /* non-straight */ }, 0 },
+            };
+            for (size_t i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+                Rank high;
+                TEST_ASSERT_EQUAL(cases[i].expected_result,
+                                 is_straight(cases[i].cards, 5, &high));
+            }
+        }
+        ```
+      - [ ] Remove obsolete tests
+      - [ ] Ensure all edge cases covered
+      - [ ] Run tests and verify all pass
+      - [ ] Use gcov for coverage analysis: `gcc -fprofile-arcs -ftest-coverage`
+
+      ## Notes
+      Table-driven tests reduce duplication. Use gcov/lcov for coverage reporting.
+    labels: [testing, refactoring]
+    milestone: "05.Examples & Polish"
+
+  - title: "[05.07] Create ALGORITHM_EXPLAINED.md for beginners"
+    body: |
+      Write comprehensive algorithm documentation for beginners (C version).
+
+      ## Acceptance Criteria
+      - [ ] Create `docs/ALGORITHM_EXPLAINED.md`
+      - [ ] Explain poker hand ranking system (Royal Flush → High Card)
+      - [ ] Document tiebreaker system with examples
+      - [ ] Explain C-specific design decisions:
+        - Using output parameters instead of return values
+        - Manual memory management (malloc/free)
+        - Using qsort() for sorting
+        - Array-based rank counting (not HashMap)
+        - Fixed-size arrays to avoid dynamic allocation
+      - [ ] Include code examples with C syntax
+      - [ ] Add complexity analysis (time, space)
+      - [ ] Explain manual combination generation with nested loops
+
+      ## Notes
+      Comprehensive guide helps beginners understand both poker evaluation and C patterns.
+    labels: [documentation]
+    milestone: "05.Examples & Polish"
+
+  - title: "[05.08] Create MEMORY_SAFETY.md guide"
+    body: |
+      Document memory safety patterns and best practices.
+
+      ## Acceptance Criteria
+      - [ ] Create `analysis/MEMORY_SAFETY.md`
+      - [ ] Document all allocation patterns:
+        - `deck_new()` must be paired with `deck_free()`
+        - Caller-allocated buffers (card_to_string, rank_counts)
+        - Fixed-size Hand struct (no allocation needed)
+      - [ ] Document Valgrind usage:
+        - Running Valgrind on tests: `valgrind --leak-check=full ./test_runner`
+        - Interpreting Valgrind output
+        - Fixing common leaks
+      - [ ] Document common pitfalls:
+        - Forgetting to free allocated memory
+        - Buffer overflows in string operations
+        - Using freed pointers (use-after-free)
+        - Double-free errors
+      - [ ] Document defensive coding practices:
+        - NULL pointer checks
+        - Bounds checking for arrays
+        - Using const for read-only parameters
+      - [ ] Include Valgrind clean output as proof of no leaks
+
+      ## Notes
+      Memory safety is critical in C. This guide helps prevent common errors.
+    labels: [documentation]
+    milestone: "05.Examples & Polish"
+
+  - title: "[05.09] Update README with final polish"
+    body: |
+      Finalize README with complete documentation.
+
+      ## Acceptance Criteria
+      - [ ] Add "## Installation" section:
+        ```bash
+        make all
+        sudo make install  # Installs to /usr/local/lib and /usr/local/include
+        ```
+      - [ ] Add "## Usage" section with complete API examples (C syntax)
+      - [ ] Add "## Building" section:
+        - `make all` - Build static library
+        - `make test` - Build and run tests
+        - `make examples` - Build example programs
+        - `make clean` - Remove build artifacts
+      - [ ] Add "## Testing" section:
+        - `make test` - Run Unity tests
+        - `make valgrind` - Run Valgrind leak check
+        - `gcov`/`lcov` - Coverage analysis
+      - [ ] Add "## Performance" section with benchmark results
+      - [ ] Add "## Memory Safety" section:
+        - Emphasize malloc/free patterns
+        - Link to MEMORY_SAFETY.md
+        - Valgrind usage
+      - [ ] Add "## Documentation" section linking to:
+        - `ALGORITHM_EXPLAINED.md`
+        - `MEMORY_SAFETY.md`
+        - Doxygen (if generated)
+      - [ ] Add "## License" section (MIT)
+      - [ ] Verify all links work
+      - [ ] Proofread for clarity
+
+      ## Notes
+      Final README emphasizes memory safety and C-specific tooling.
+    labels: [documentation]
+    milestone: "05.Examples & Polish"

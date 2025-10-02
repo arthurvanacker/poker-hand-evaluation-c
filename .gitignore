@@ -69,11 +69,12 @@ dist/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
-Makefile
+# Note: We use a custom Makefile for this project, not CMake-generated
+# Makefile
 *.cmake
 
-# Scripts folder
-scripts/
+# Note: Scripts folder is tracked in git
+# scripts/
 
 # Claude Code
 .claude/
