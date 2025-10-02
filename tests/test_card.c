@@ -286,6 +286,226 @@ void test_card_to_string_edge_cases(void) {
     printf("  ✓ Edge cases handled correctly\n");
 }
 
+void test_parse_card_valid_ranks(void) {
+    printf("Testing parse_card with valid ranks...\n");
+    Card card;
+
+    // Test numeric ranks 2-9
+    assert(parse_card("2h", &card) == 0);
+    assert(card.rank == RANK_TWO);
+    assert(card.suit == SUIT_HEARTS);
+
+    assert(parse_card("3h", &card) == 0);
+    assert(card.rank == RANK_THREE);
+
+    assert(parse_card("4h", &card) == 0);
+    assert(card.rank == RANK_FOUR);
+
+    assert(parse_card("5h", &card) == 0);
+    assert(card.rank == RANK_FIVE);
+
+    assert(parse_card("6h", &card) == 0);
+    assert(card.rank == RANK_SIX);
+
+    assert(parse_card("7h", &card) == 0);
+    assert(card.rank == RANK_SEVEN);
+
+    assert(parse_card("8h", &card) == 0);
+    assert(card.rank == RANK_EIGHT);
+
+    assert(parse_card("9h", &card) == 0);
+    assert(card.rank == RANK_NINE);
+
+    // Test Ten (uppercase and lowercase)
+    assert(parse_card("Th", &card) == 0);
+    assert(card.rank == RANK_TEN);
+
+    assert(parse_card("th", &card) == 0);
+    assert(card.rank == RANK_TEN);
+
+    // Test face cards (uppercase and lowercase)
+    assert(parse_card("Jh", &card) == 0);
+    assert(card.rank == RANK_JACK);
+
+    assert(parse_card("jh", &card) == 0);
+    assert(card.rank == RANK_JACK);
+
+    assert(parse_card("Qh", &card) == 0);
+    assert(card.rank == RANK_QUEEN);
+
+    assert(parse_card("qh", &card) == 0);
+    assert(card.rank == RANK_QUEEN);
+
+    assert(parse_card("Kh", &card) == 0);
+    assert(card.rank == RANK_KING);
+
+    assert(parse_card("kh", &card) == 0);
+    assert(card.rank == RANK_KING);
+
+    assert(parse_card("Ah", &card) == 0);
+    assert(card.rank == RANK_ACE);
+
+    assert(parse_card("ah", &card) == 0);
+    assert(card.rank == RANK_ACE);
+
+    printf("  ✓ All valid ranks parsed correctly\n");
+}
+
+void test_parse_card_valid_suits(void) {
+    printf("Testing parse_card with valid suits...\n");
+    Card card;
+
+    // Test hearts (uppercase and lowercase)
+    assert(parse_card("Ah", &card) == 0);
+    assert(card.suit == SUIT_HEARTS);
+
+    assert(parse_card("AH", &card) == 0);
+    assert(card.suit == SUIT_HEARTS);
+
+    // Test diamonds (uppercase and lowercase)
+    assert(parse_card("Ad", &card) == 0);
+    assert(card.suit == SUIT_DIAMONDS);
+
+    assert(parse_card("AD", &card) == 0);
+    assert(card.suit == SUIT_DIAMONDS);
+
+    // Test clubs (uppercase and lowercase)
+    assert(parse_card("Ac", &card) == 0);
+    assert(card.suit == SUIT_CLUBS);
+
+    assert(parse_card("AC", &card) == 0);
+    assert(card.suit == SUIT_CLUBS);
+
+    // Test spades (uppercase and lowercase)
+    assert(parse_card("As", &card) == 0);
+    assert(card.suit == SUIT_SPADES);
+
+    assert(parse_card("AS", &card) == 0);
+    assert(card.suit == SUIT_SPADES);
+
+    printf("  ✓ All valid suits parsed correctly\n");
+}
+
+void test_parse_card_null_pointer_errors(void) {
+    printf("Testing parse_card NULL pointer handling...\n");
+    Card card;
+
+    // Test NULL string pointer
+    assert(parse_card(NULL, &card) == -1);
+
+    // Test NULL card pointer
+    assert(parse_card("Ah", NULL) == -1);
+
+    // Test both NULL
+    assert(parse_card(NULL, NULL) == -1);
+
+    printf("  ✓ NULL pointer errors handled correctly\n");
+}
+
+void test_parse_card_invalid_string_length(void) {
+    printf("Testing parse_card invalid string length...\n");
+    Card card;
+
+    // Test empty string
+    assert(parse_card("", &card) == -1);
+
+    // Test too short (1 character)
+    assert(parse_card("A", &card) == -1);
+
+    // Test too long (3+ characters)
+    assert(parse_card("Ahs", &card) == -1);
+    assert(parse_card("AhXX", &card) == -1);
+
+    printf("  ✓ Invalid string length rejected\n");
+}
+
+void test_parse_card_invalid_rank_characters(void) {
+    printf("Testing parse_card invalid rank characters...\n");
+    Card card;
+
+    // Test invalid rank characters
+    assert(parse_card("0h", &card) == -1);
+    assert(parse_card("1h", &card) == -1);
+    assert(parse_card("Xh", &card) == -1);
+    assert(parse_card("Nh", &card) == -1);
+    assert(parse_card("Bh", &card) == -1);
+
+    printf("  ✓ Invalid rank characters rejected\n");
+}
+
+void test_parse_card_invalid_suit_characters(void) {
+    printf("Testing parse_card invalid suit characters...\n");
+    Card card;
+
+    // Test invalid suit characters
+    assert(parse_card("Ax", &card) == -1);
+    assert(parse_card("Aa", &card) == -1);
+    assert(parse_card("A1", &card) == -1);
+    assert(parse_card("A0", &card) == -1);
+    assert(parse_card("Az", &card) == -1);
+
+    printf("  ✓ Invalid suit characters rejected\n");
+}
+
+void test_parse_card_bidirectional_conversion(void) {
+    printf("Testing bidirectional parse ↔ to_string conversion...\n");
+
+    // Test all 52 cards: parse → to_string → parse
+    const char* test_cards[] = {
+        "2h", "3h", "4h", "5h", "6h", "7h", "8h", "9h", "Th", "Jh", "Qh", "Kh", "Ah",
+        "2d", "3d", "4d", "5d", "6d", "7d", "8d", "9d", "Td", "Jd", "Qd", "Kd", "Ad",
+        "2c", "3c", "4c", "5c", "6c", "7c", "8c", "9c", "Tc", "Jc", "Qc", "Kc", "Ac",
+        "2s", "3s", "4s", "5s", "6s", "7s", "8s", "9s", "Ts", "Js", "Qs", "Ks", "As"
+    };
+
+    for (int i = 0; i < 52; i++) {
+        Card card1, card2;
+        char buffer[3];
+
+        // Parse original string
+        assert(parse_card(test_cards[i], &card1) == 0);
+
+        // Convert to string
+        assert(card_to_string(card1, buffer, sizeof(buffer)) == 0);
+
+        // Parse the converted string
+        assert(parse_card(buffer, &card2) == 0);
+
+        // Verify both cards are identical
+        assert(card1.rank == card2.rank);
+        assert(card1.suit == card2.suit);
+    }
+
+    printf("  ✓ Bidirectional conversion works for all 52 cards\n");
+}
+
+void test_parse_card_case_insensitive_combinations(void) {
+    printf("Testing parse_card case-insensitive combinations...\n");
+    Card card;
+
+    // Test various case combinations
+    assert(parse_card("ah", &card) == 0);
+    assert(card.rank == RANK_ACE && card.suit == SUIT_HEARTS);
+
+    assert(parse_card("AH", &card) == 0);
+    assert(card.rank == RANK_ACE && card.suit == SUIT_HEARTS);
+
+    assert(parse_card("Ah", &card) == 0);
+    assert(card.rank == RANK_ACE && card.suit == SUIT_HEARTS);
+
+    assert(parse_card("aH", &card) == 0);
+    assert(card.rank == RANK_ACE && card.suit == SUIT_HEARTS);
+
+    // Test with Ten
+    assert(parse_card("td", &card) == 0);
+    assert(card.rank == RANK_TEN && card.suit == SUIT_DIAMONDS);
+
+    assert(parse_card("TD", &card) == 0);
+    assert(card.rank == RANK_TEN && card.suit == SUIT_DIAMONDS);
+
+    printf("  ✓ Case-insensitive combinations work correctly\n");
+}
+
 int main(void) {
     printf("\n=== Card Struct Test Suite ===\n\n");
 
@@ -302,6 +522,16 @@ int main(void) {
     test_card_to_string_all_52_cards();
     test_card_to_string_buffer_overflow();
     test_card_to_string_edge_cases();
+
+    printf("\n=== Parse Card Test Suite ===\n\n");
+    test_parse_card_valid_ranks();
+    test_parse_card_valid_suits();
+    test_parse_card_null_pointer_errors();
+    test_parse_card_invalid_string_length();
+    test_parse_card_invalid_rank_characters();
+    test_parse_card_invalid_suit_characters();
+    test_parse_card_bidirectional_conversion();
+    test_parse_card_case_insensitive_combinations();
 
     printf("\n=== All tests passed! ===\n\n");
     return 0;
