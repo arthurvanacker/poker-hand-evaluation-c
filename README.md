@@ -119,10 +119,117 @@ int main(void) {
 
 **Memory Management:** Always call `deck_free()` to prevent memory leaks. The library uses manual memory management - Valgrind verification ensures zero leaks.
 
+## Evaluation Core
+
+The evaluation core provides the data structures and helper functions needed to evaluate poker hands. This layer builds on the foundation to identify hand categories and compare hands.
+
+### HandCategory Enum
+
+The `HandCategory` enum represents all 10 poker hand types with explicit numeric values that enable direct comparison:
+
+```c
+typedef enum {
+    HAND_HIGH_CARD = 1,
+    HAND_ONE_PAIR = 2,
+    HAND_TWO_PAIR = 3,
+    HAND_THREE_OF_A_KIND = 4,
+    HAND_STRAIGHT = 5,
+    HAND_FLUSH = 6,
+    HAND_FULL_HOUSE = 7,
+    HAND_FOUR_OF_A_KIND = 8,
+    HAND_STRAIGHT_FLUSH = 9,
+    HAND_ROYAL_FLUSH = 10
+} HandCategory;
+```
+
+The explicit discriminants allow numeric comparison: `HAND_ROYAL_FLUSH > HAND_FLUSH` evaluates to true.
+
+### Hand Structure
+
+The `Hand` struct represents an evaluated 5-card poker hand:
+
+```c
+#define MAX_TIEBREAKERS 5
+
+typedef struct {
+    Card cards[5];              /* Fixed-size array (exactly 5 cards) */
+    HandCategory category;       /* Hand type */
+    Rank tiebreakers[MAX_TIEBREAKERS]; /* Ranks for tiebreaking */
+    size_t num_tiebreakers;     /* Number of valid tiebreakers */
+} Hand;
+```
+
+**Fields:**
+- `cards`: Fixed array containing exactly 5 cards
+- `category`: The hand type (Royal Flush, Straight, High Card, etc.)
+- `tiebreakers`: Ranks in descending order of importance for comparing hands of the same category
+- `num_tiebreakers`: Number of valid tiebreaker values (0-5)
+
+Using fixed-size arrays avoids dynamic allocation and simplifies memory management.
+
+### Helper Functions
+
+The evaluation core provides three key helper functions:
+
+#### is_flush()
+
+```c
+int is_flush(const Card* cards, size_t len);
+```
+
+Checks if all cards are the same suit. Returns 1 if flush, 0 otherwise. Returns 0 if `len != 5`.
+
+#### is_straight()
+
+```c
+int is_straight(const Card* cards, size_t len, Rank* out_high_card);
+```
+
+Checks if 5 cards form a sequence. Uses `qsort()` from `<stdlib.h>` to sort ranks in descending order, then validates the sequence.
+
+**Wheel Straight Special Case:** The ace-low straight A-2-3-4-5 (the "wheel") is treated specially. When detected, the function returns 1 and sets `out_high_card` to `RANK_FIVE` (not `RANK_ACE`), since the five is the high card in this straight.
+
+**Parameters:**
+- `cards`: Array of cards to check
+- `len`: Number of cards (must be 5)
+- `out_high_card`: Pointer to receive the high card rank (can be NULL)
+
+**Returns:** 1 if straight, 0 otherwise
+
+#### rank_counts()
+
+```c
+void rank_counts(const Card* cards, size_t len, int* counts);
+```
+
+Counts the frequency of each rank using an array-based approach (not a HashMap). The caller must provide an array of at least 15 integers, indexed by rank value (0-14).
+
+**Example:** For four aces and a king:
+- `counts[RANK_ACE]` = 4
+- `counts[RANK_KING]` = 1
+- All other indices = 0
+
+This function is used to detect pairs, three-of-a-kind, four-of-a-kind, and full house patterns.
+
+### Evaluation Architecture
+
+The evaluation system follows a layered design:
+
+1. **Foundation Layer** (Phase 01): Basic types (Rank, Suit, Card, Deck)
+2. **Evaluation Core** (Phase 02): Hand representation and helper functions
+3. **Detection Layer** (Phase 03): Hand category detectors (Royal Flush → High Card)
+4. **Integration Layer** (Phase 04): Orchestration (`evaluate_hand()`, `compare_hands()`)
+
+The helper functions use C standard library features:
+- `qsort()` for sorting ranks
+- Array-based counting (not HashMap) for rank frequency analysis
+- Fixed-size arrays to avoid dynamic allocation
+
 ## Status
 
 ✅ **Phase 0 Complete** - Project structure, build system, and documentation framework established
 ✅ **Phase 1 Complete** - Foundation layer (Rank, Suit, Card, Deck) with full test coverage
+✅ **Phase 2 Complete** - Evaluation core (HandCategory, Hand, helper functions) with comprehensive tests
 🚧 Under Development - This README will be updated as each phase completes.
 
 ## License
