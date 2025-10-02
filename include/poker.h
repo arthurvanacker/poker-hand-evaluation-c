@@ -160,4 +160,37 @@ void deck_shuffle(Deck* deck);
  */
 size_t deck_deal(Deck* deck, Card* out_cards, size_t n);
 
+
+/*
+ * Maximum number of tiebreaker ranks in Hand struct
+ */
+#define MAX_TIEBREAKERS 5
+
+/*
+ * Hand structure
+ *
+ * Represents an evaluated 5-card poker hand with its category and tiebreakers.
+ *
+ * Fields:
+ * - cards: Fixed-size array containing exactly 5 cards that form the hand
+ * - category: The hand type (HAND_HIGH_CARD to HAND_ROYAL_FLUSH) that identifies
+ *             the poker hand ranking category
+ * - tiebreakers: Array of ranks in descending order of importance used to break
+ *                ties between hands of the same category. For example, in a pair
+ *                of Kings with A-Q-J kickers, tiebreakers would be [K, A, Q, J]
+ * - num_tiebreakers: Number of valid tiebreaker ranks in the tiebreakers array
+ *                    (0 to MAX_TIEBREAKERS)
+ *
+ * Design notes:
+ * - Uses fixed-size arrays to avoid dynamic memory allocation
+ * - Tiebreaker count is tracked explicitly for clarity and bounds checking
+ * - Ranks in tiebreakers are ordered by importance for efficient comparison
+ */
+typedef struct {
+    Card cards[5];                      /* Exactly 5 cards */
+    HandCategory category;               /* Hand type */
+    Rank tiebreakers[MAX_TIEBREAKERS];  /* Ranks for tiebreaking */
+    size_t num_tiebreakers;             /* Number of valid tiebreakers */
+} Hand;
+
 #endif /* POKER_H */
