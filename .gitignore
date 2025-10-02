@@ -36,11 +36,26 @@
 *.x86_64
 *.hex
 
+# Example executables (but keep source files)
+/examples/*
+!/examples/*.c
+!/examples/*.h
+!/examples/.gitkeep
+
 # Debug files
 *.dSYM/
 *.su
 *.idb
 *.pdb
+
+# Test outputs
+/test_results/
+
+# Coverage files
+*.gcda
+*.gcno
+*.gcov
+/coverage/
 
 # Kernel Module Compile Results
 *.mod*
@@ -58,9 +73,11 @@ dkms.conf
 *.swo
 *~
 .DS_Store
+Thumbs.db
 
 # Build directories
-build/
+/build/
+/lib/
 bin/
 obj/
 dist/
