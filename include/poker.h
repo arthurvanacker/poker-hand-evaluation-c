@@ -168,6 +168,15 @@ size_t deck_deal(Deck* deck, Card* out_cards, size_t n);
  */
 int is_flush(const Card* cards, size_t len);
 
+/**
+ * @brief Check if cards form a straight
+ * @param cards Array of cards to check
+ * @param len Number of cards (must be 5)
+ * @param out_high_card Optional pointer to receive high card rank
+ * @return 1 if straight detected, 0 otherwise
+ */
+int is_straight(const Card* cards, size_t len, Rank* out_high_card);
+
 /*
  * Maximum number of tiebreaker ranks in Hand struct
  */
