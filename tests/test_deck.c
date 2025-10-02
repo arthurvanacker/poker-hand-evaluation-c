@@ -440,6 +440,55 @@ void test_deck_deal_from_empty_deck(void) {
     printf("  ✓ Deal from empty deck returns 0 cards\n");
 }
 
+void test_deck_free_null_pointer(void) {
+    printf("Testing deck_free with NULL pointer...\n");
+
+    // This should not crash - deck_free() must handle NULL gracefully
+    deck_free(NULL);
+
+    printf("  ✓ deck_free(NULL) completes without crash\n");
+}
+
+void test_deck_free_valid_deck(void) {
+    printf("Testing deck_free with valid deck...\n");
+
+    // Create a deck
+    Deck* deck = deck_new();
+    assert(deck != NULL);
+    assert(deck->cards != NULL);
+    assert(deck->size == 52);
+
+    // Free the deck - should deallocate cards array and deck struct
+    // This test passes if no crash occurs and Valgrind shows no leaks
+    deck_free(deck);
+
+    printf("  ✓ deck_free() deallocates deck successfully\n");
+}
+
+void test_deck_free_after_operations(void) {
+    printf("Testing deck_free after shuffle and deal operations...\n");
+
+    // Create deck and perform operations
+    Deck* deck = deck_new();
+    assert(deck != NULL);
+
+    // Shuffle the deck
+    srand(42);
+    deck_shuffle(deck);
+
+    // Deal some cards
+    Card dealt[10];
+    size_t dealt_count = deck_deal(deck, dealt, 10);
+    assert(dealt_count == 10);
+    assert(deck->size == 42);
+
+    // Free the deck after modifications
+    // This verifies that deck_free() works correctly after deck operations
+    deck_free(deck);
+
+    printf("  ✓ deck_free() works correctly after shuffle and deal\n");
+}
+
 int main(void) {
     printf("\n=== Deck Test Suite ===\n\n");
 
@@ -458,6 +507,9 @@ int main(void) {
     test_deck_deal_more_than_available();
     test_deck_deal_multiple_times();
     test_deck_deal_from_empty_deck();
+    test_deck_free_null_pointer();
+    test_deck_free_valid_deck();
+    test_deck_free_after_operations();
 
     printf("\n=== All deck tests passed! ===\n\n");
     return 0;

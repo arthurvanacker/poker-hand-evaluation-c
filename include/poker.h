@@ -96,7 +96,13 @@ Deck* deck_new(void);
 
 /**
  * @brief Free deck and all associated memory
- * @param deck Pointer to deck to free
+ *
+ * Deallocates the deck's card array and the deck structure itself.
+ * Safe to call with NULL pointer (no-op). After calling this function,
+ * the deck pointer becomes invalid and must not be used.
+ *
+ * @param deck Pointer to deck to free (can be NULL)
+ * @warning Deck pointer is invalid after calling this function
  */
 void deck_free(Deck* deck);
 
