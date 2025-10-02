@@ -76,4 +76,28 @@ int card_to_string(Card card, char* buffer, size_t size);
  */
 int parse_card(const char* str, Card* out_card);
 
+/*
+ * Deck structure
+ *
+ * Represents a dynamic array of cards with capacity tracking.
+ * Used for standard 52-card deck and can support deck manipulation operations.
+ */
+typedef struct {
+    Card* cards;     /* Dynamic array of cards */
+    size_t size;     /* Current number of cards */
+    size_t capacity; /* Allocated capacity */
+} Deck;
+
+/**
+ * @brief Create new deck with 52 cards
+ * @return Pointer to new Deck, or NULL on allocation failure
+ */
+Deck* deck_new(void);
+
+/**
+ * @brief Free deck and all associated memory
+ * @param deck Pointer to deck to free
+ */
+void deck_free(Deck* deck);
+
 #endif /* POKER_H */
