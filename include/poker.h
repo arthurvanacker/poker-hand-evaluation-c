@@ -46,6 +46,26 @@ typedef enum {
     SUIT_CLUBS,
     SUIT_SPADES
 } Suit;
+/*
+ * HandCategory enumeration
+ *
+ * Represents poker hand categories from high card to royal flush.
+ * Explicit numeric values enable direct comparison: higher value = stronger hand.
+ * This allows simple numeric comparison (e.g., HAND_ROYAL_FLUSH > HAND_FLUSH).
+ */
+typedef enum {
+    HAND_HIGH_CARD = 1,
+    HAND_ONE_PAIR = 2,
+    HAND_TWO_PAIR = 3,
+    HAND_THREE_OF_A_KIND = 4,
+    HAND_STRAIGHT = 5,
+    HAND_FLUSH = 6,
+    HAND_FULL_HOUSE = 7,
+    HAND_FOUR_OF_A_KIND = 8,
+    HAND_STRAIGHT_FLUSH = 9,
+    HAND_ROYAL_FLUSH = 10
+} HandCategory;
+
 
 /*
  * Card structure
@@ -75,6 +95,34 @@ int card_to_string(Card card, char* buffer, size_t size);
  * @return 0 on success, -1 on error
  */
 int parse_card(const char* str, Card* out_card);
+/*
+ * Maximum number of tiebreakers for hand comparison
+ *
+ * The maximum number of ranks needed to break ties between hands
+ * of the same category. For example, high card hands may need up to
+ * 5 tiebreakers (all 5 card ranks).
+ */
+#define MAX_TIEBREAKERS 5
+
+/*
+ * Hand structure
+ *
+ * Represents an evaluated poker hand with exactly 5 cards.
+ * Contains the hand category (type) and tiebreaker ranks for comparison.
+ *
+ * Fields:
+ * - cards: Fixed-size array containing exactly 5 cards
+ * - category: The hand type (high card, pair, flush, etc.)
+ * - tiebreakers: Ranks in descending importance order for breaking ties
+ * - num_tiebreakers: Number of valid entries in tiebreakers array
+ */
+typedef struct {
+    Card cards[5];              /* Fixed-size array (exactly 5 cards) */
+    HandCategory category;       /* Hand type */
+    Rank tiebreakers[MAX_TIEBREAKERS]; /* Ranks for tiebreaking */
+    size_t num_tiebreakers;     /* Number of valid tiebreakers */
+} Hand;
+
 
 /*
  * Deck structure
