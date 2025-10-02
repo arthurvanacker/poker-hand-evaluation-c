@@ -6,6 +6,8 @@
 #ifndef POKER_H
 #define POKER_H
 
+#include <stdint.h>
+
 /*
  * Rank enumeration
  *
@@ -30,5 +32,30 @@ typedef enum {
     RANK_KING = 13,
     RANK_ACE = 14
 } Rank;
+
+/*
+ * Suit enumeration
+ *
+ * Represents the four standard suits in a poker deck.
+ * Values are sequential starting from 0 for efficient array indexing.
+ */
+typedef enum {
+    SUIT_HEARTS,
+    SUIT_DIAMONDS,
+    SUIT_CLUBS,
+    SUIT_SPADES
+} Suit;
+
+/*
+ * Card structure
+ *
+ * Represents a single playing card with rank and suit.
+ * Designed to be compact (2 bytes) and passed by value efficiently.
+ * Uses uint8_t to ensure minimal memory footprint.
+ */
+typedef struct {
+    uint8_t rank;  /* Rank value (2-14) */
+    uint8_t suit;  /* Suit value (0-3) */
+} Card;
 
 #endif /* POKER_H */
