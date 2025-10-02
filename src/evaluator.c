@@ -60,6 +60,35 @@ int is_straight(const Card* cards, size_t len, Rank* out_high_card) {
 }
 
 /**
+ * @brief Check if all cards are the same suit
+ *
+ * Validates that all cards in the array have the same suit, which is required
+ * for flush detection in poker hand evaluation.
+ *
+ * @param cards Array of cards to check
+ * @param len Number of cards (must be 5 for valid poker hand)
+ * @return 1 if all cards have same suit, 0 otherwise
+ */
+int is_flush(const Card* cards, size_t len) {
+    /* Validate input parameters */
+    if (cards == NULL || len != 5) {
+        return 0;
+    }
+
+    /* Get suit of first card */
+    uint8_t first_suit = cards[0].suit;
+
+    /* Check if all other cards have same suit */
+    for (size_t i = 1; i < len; i++) {
+        if (cards[i].suit != first_suit) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+/**
  * @brief Count frequency of each rank
  *
  * Initializes counts array to zero, then iterates through cards and
@@ -95,35 +124,6 @@ void rank_counts(const Card* cards, size_t len, int* counts) {
             counts[rank]++;
         }
     }
-}
-
-/**
- * @brief Check if all cards are the same suit
- *
- * Validates that all cards in the array have the same suit, which is required
- * for flush detection in poker hand evaluation.
- *
- * @param cards Array of cards to check
- * @param len Number of cards (must be 5 for valid poker hand)
- * @return 1 if all cards have same suit, 0 otherwise
- */
-int is_flush(const Card* cards, size_t len) {
-    /* Validate input parameters */
-    if (cards == NULL || len != 5) {
-        return 0;
-    }
-
-    /* Get suit of first card */
-    uint8_t first_suit = cards[0].suit;
-
-    /* Check if all other cards have same suit */
-    for (size_t i = 1; i < len; i++) {
-        if (cards[i].suit != first_suit) {
-            return 0;
-        }
-    }
-
-    return 1;
 }
 
 int evaluate_hand(void) {
