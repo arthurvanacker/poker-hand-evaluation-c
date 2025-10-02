@@ -48,6 +48,30 @@ typedef enum {
 } Suit;
 
 /*
+ * HandCategory enumeration
+ *
+ * Represents the ranking categories of poker hands.
+ * Explicit numeric values (1-10) enable direct comparison where higher values
+ * represent stronger hands. This allows simple numeric comparison to determine
+ * which hand wins (e.g., HAND_ROYAL_FLUSH > HAND_FLUSH).
+ *
+ * Hands are ranked from weakest (1) to strongest (10) according to standard
+ * poker rules.
+ */
+typedef enum {
+    HAND_HIGH_CARD = 1,
+    HAND_ONE_PAIR = 2,
+    HAND_TWO_PAIR = 3,
+    HAND_THREE_OF_A_KIND = 4,
+    HAND_STRAIGHT = 5,
+    HAND_FLUSH = 6,
+    HAND_FULL_HOUSE = 7,
+    HAND_FOUR_OF_A_KIND = 8,
+    HAND_STRAIGHT_FLUSH = 9,
+    HAND_ROYAL_FLUSH = 10
+} HandCategory;
+
+/*
  * Card structure
  *
  * Represents a single playing card with rank and suit.
