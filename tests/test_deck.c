@@ -257,6 +257,189 @@ void test_deck_shuffle_randomness(void) {
     printf("  ✓ Different seeds produce different shuffle results\n");
 }
 
+void test_deck_deal_basic(void) {
+    printf("Testing deck_deal basic functionality...\n");
+
+    Deck* deck = deck_new();
+    assert(deck != NULL);
+    assert(deck->size == 52);
+
+    // Deal 5 cards
+    Card dealt_cards[5];
+    size_t dealt_count = deck_deal(deck, dealt_cards, 5);
+
+    // Verify return value is correct
+    assert(dealt_count == 5);
+
+    // Verify deck size decreased
+    assert(deck->size == 47);
+
+    // Verify dealt cards match first 5 cards from original deck
+    Deck* original_deck = deck_new();
+    for (size_t i = 0; i < 5; i++) {
+        assert(dealt_cards[i].rank == original_deck->cards[i].rank);
+        assert(dealt_cards[i].suit == original_deck->cards[i].suit);
+    }
+
+    deck_free(deck);
+    deck_free(original_deck);
+
+    printf("  ✓ Deal 5 cards reduces deck size and copies cards correctly\n");
+}
+
+void test_deck_deal_zero_cards(void) {
+    printf("Testing deck_deal with zero cards...\n");
+
+    Deck* deck = deck_new();
+    assert(deck != NULL);
+    size_t original_size = deck->size;
+
+    // Deal 0 cards
+    Card dealt_cards[1];
+    size_t dealt_count = deck_deal(deck, dealt_cards, 0);
+
+    // Verify return value is 0
+    assert(dealt_count == 0);
+
+    // Verify deck size unchanged
+    assert(deck->size == original_size);
+
+    deck_free(deck);
+
+    printf("  ✓ Deal 0 cards leaves deck unchanged\n");
+}
+
+void test_deck_deal_all_cards(void) {
+    printf("Testing deck_deal with all 52 cards...\n");
+
+    Deck* deck = deck_new();
+    assert(deck != NULL);
+
+    // Deal all 52 cards
+    Card dealt_cards[52];
+    size_t dealt_count = deck_deal(deck, dealt_cards, 52);
+
+    // Verify return value is 52
+    assert(dealt_count == 52);
+
+    // Verify deck is now empty
+    assert(deck->size == 0);
+
+    // Verify all cards were dealt
+    Deck* original_deck = deck_new();
+    for (size_t i = 0; i < 52; i++) {
+        assert(dealt_cards[i].rank == original_deck->cards[i].rank);
+        assert(dealt_cards[i].suit == original_deck->cards[i].suit);
+    }
+
+    deck_free(deck);
+    deck_free(original_deck);
+
+    printf("  ✓ Deal all 52 cards empties deck completely\n");
+}
+
+void test_deck_deal_more_than_available(void) {
+    printf("Testing deck_deal with more cards than available...\n");
+
+    Deck* deck = deck_new();
+    assert(deck != NULL);
+    assert(deck->size == 52);
+
+    // Try to deal 53 cards (more than available)
+    Card dealt_cards[53];
+    size_t dealt_count = deck_deal(deck, dealt_cards, 53);
+
+    // Verify return value is 52 (actual number dealt)
+    assert(dealt_count == 52);
+
+    // Verify deck is now empty
+    assert(deck->size == 0);
+
+    // Verify only 52 cards were dealt
+    Deck* original_deck = deck_new();
+    for (size_t i = 0; i < 52; i++) {
+        assert(dealt_cards[i].rank == original_deck->cards[i].rank);
+        assert(dealt_cards[i].suit == original_deck->cards[i].suit);
+    }
+
+    deck_free(deck);
+    deck_free(original_deck);
+
+    printf("  ✓ Deal 53 cards returns only 52 available cards\n");
+}
+
+void test_deck_deal_multiple_times(void) {
+    printf("Testing deck_deal called multiple times...\n");
+
+    Deck* deck = deck_new();
+    assert(deck != NULL);
+    assert(deck->size == 52);
+
+    // Deal 5 cards
+    Card first_deal[5];
+    size_t first_count = deck_deal(deck, first_deal, 5);
+    assert(first_count == 5);
+    assert(deck->size == 47);
+
+    // Deal another 10 cards
+    Card second_deal[10];
+    size_t second_count = deck_deal(deck, second_deal, 10);
+    assert(second_count == 10);
+    assert(deck->size == 37);
+
+    // Deal remaining 37 cards
+    Card third_deal[37];
+    size_t third_count = deck_deal(deck, third_deal, 37);
+    assert(third_count == 37);
+    assert(deck->size == 0);
+
+    // Verify cards are dealt sequentially
+    Deck* original_deck = deck_new();
+    for (size_t i = 0; i < 5; i++) {
+        assert(first_deal[i].rank == original_deck->cards[i].rank);
+        assert(first_deal[i].suit == original_deck->cards[i].suit);
+    }
+    for (size_t i = 0; i < 10; i++) {
+        assert(second_deal[i].rank == original_deck->cards[5 + i].rank);
+        assert(second_deal[i].suit == original_deck->cards[5 + i].suit);
+    }
+    for (size_t i = 0; i < 37; i++) {
+        assert(third_deal[i].rank == original_deck->cards[15 + i].rank);
+        assert(third_deal[i].suit == original_deck->cards[15 + i].suit);
+    }
+
+    deck_free(deck);
+    deck_free(original_deck);
+
+    printf("  ✓ Multiple deals work sequentially\n");
+}
+
+void test_deck_deal_from_empty_deck(void) {
+    printf("Testing deck_deal from empty deck...\n");
+
+    Deck* deck = deck_new();
+    assert(deck != NULL);
+
+    // Empty the deck first
+    Card discard[52];
+    deck_deal(deck, discard, 52);
+    assert(deck->size == 0);
+
+    // Try to deal from empty deck
+    Card dealt_cards[5];
+    size_t dealt_count = deck_deal(deck, dealt_cards, 5);
+
+    // Verify return value is 0
+    assert(dealt_count == 0);
+
+    // Verify deck is still empty
+    assert(deck->size == 0);
+
+    deck_free(deck);
+
+    printf("  ✓ Deal from empty deck returns 0 cards\n");
+}
+
 int main(void) {
     printf("\n=== Deck Test Suite ===\n\n");
 
@@ -269,6 +452,12 @@ int main(void) {
     test_deck_shuffle_preserves_all_cards();
     test_deck_shuffle_changes_order();
     test_deck_shuffle_randomness();
+    test_deck_deal_basic();
+    test_deck_deal_zero_cards();
+    test_deck_deal_all_cards();
+    test_deck_deal_more_than_available();
+    test_deck_deal_multiple_times();
+    test_deck_deal_from_empty_deck();
 
     printf("\n=== All deck tests passed! ===\n\n");
     return 0;
