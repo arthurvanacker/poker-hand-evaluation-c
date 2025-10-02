@@ -68,4 +68,12 @@ typedef struct {
  */
 int card_to_string(Card card, char* buffer, size_t size);
 
+/**
+ * @brief Parse string into Card struct
+ * @param str Input string (e.g., "Ah", "Td")
+ * @param out_card Pointer to Card to receive result
+ * @return 0 on success, -1 on error
+ */
+int parse_card(const char* str, Card* out_card);
+
 #endif /* POKER_H */
