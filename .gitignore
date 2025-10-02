@@ -51,11 +51,23 @@
 # Test outputs
 /test_results/
 
-# Coverage files
+# Test executables (generated during development)
+test_straight
+test_*_run
+/tests/test_is_flush
+/tests/test_*_run
+/tests/test_handcategory
+/tests/test_is_flush
+/tests/test_evaluator_run
+
+# Coverage files (all locations)
 *.gcda
 *.gcno
 *.gcov
 /coverage/
+/tests/*.gcda
+/tests/*.gcno
+/tests/*.gcov
 
 # Kernel Module Compile Results
 *.mod*
