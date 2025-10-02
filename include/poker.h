@@ -6,6 +6,7 @@
 #ifndef POKER_H
 #define POKER_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 /*
@@ -57,5 +58,14 @@ typedef struct {
     uint8_t rank;  /* Rank value (2-14) */
     uint8_t suit;  /* Suit value (0-3) */
 } Card;
+
+/**
+ * @brief Convert card to string representation (e.g., "Ah", "Td")
+ * @param card The card to convert
+ * @param buffer Output buffer (must be at least 3 bytes)
+ * @param size Size of output buffer
+ * @return 0 on success, -1 on error
+ */
+int card_to_string(Card card, char* buffer, size_t size);
 
 #endif /* POKER_H */
