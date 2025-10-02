@@ -100,4 +100,25 @@ Deck* deck_new(void);
  */
 void deck_free(Deck* deck);
 
+/**
+ * @brief Shuffle deck using Fisher-Yates algorithm
+ *
+ * Shuffles the deck in-place using the Fisher-Yates (Knuth) shuffle algorithm,
+ * which provides a uniform random permutation of all 52 cards. The algorithm
+ * iterates backwards through the array, swapping each element with a randomly
+ * selected element from the unshuffled portion.
+ *
+ * Time complexity: O(n) where n is the number of cards
+ * Space complexity: O(1) - shuffles in-place
+ *
+ * @param deck Pointer to deck to shuffle
+ *
+ * @note Caller must seed the random number generator with srand(time(NULL))
+ *       before calling this function to ensure different shuffle results.
+ *       This function uses rand() from <stdlib.h> for randomness.
+ *
+ * @warning Does not validate deck pointer. Caller must ensure deck is non-NULL.
+ */
+void deck_shuffle(Deck* deck);
+
 #endif /* POKER_H */

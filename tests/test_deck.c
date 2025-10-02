@@ -149,6 +149,114 @@ void test_deck_new_specific_cards_present(void) {
     printf("  ✓ Specific cards present in deck\n");
 }
 
+void test_deck_shuffle_preserves_all_cards(void) {
+    printf("Testing deck_shuffle preserves all 52 unique cards...\n");
+
+    Deck* deck = deck_new();
+    assert(deck != NULL);
+
+    // Shuffle the deck
+    deck_shuffle(deck);
+
+    // Verify still 52 cards
+    assert(deck->size == 52);
+
+    // Verify all cards are still unique
+    for (size_t i = 0; i < deck->size; i++) {
+        for (size_t j = i + 1; j < deck->size; j++) {
+            int same_rank = (deck->cards[i].rank == deck->cards[j].rank);
+            int same_suit = (deck->cards[i].suit == deck->cards[j].suit);
+            assert(!(same_rank && same_suit));
+        }
+    }
+
+    // Verify all 13 ranks present (4 of each)
+    int rank_counts[15] = {0};
+    for (size_t i = 0; i < deck->size; i++) {
+        rank_counts[deck->cards[i].rank]++;
+    }
+    for (int rank = RANK_TWO; rank <= RANK_ACE; rank++) {
+        assert(rank_counts[rank] == 4);
+    }
+
+    // Verify all 4 suits present (13 of each)
+    int suit_counts[4] = {0};
+    for (size_t i = 0; i < deck->size; i++) {
+        suit_counts[deck->cards[i].suit]++;
+    }
+    for (int suit = SUIT_HEARTS; suit <= SUIT_SPADES; suit++) {
+        assert(suit_counts[suit] == 13);
+    }
+
+    deck_free(deck);
+
+    printf("  ✓ Shuffled deck preserves all 52 unique cards\n");
+}
+
+void test_deck_shuffle_changes_order(void) {
+    printf("Testing deck_shuffle changes card order...\n");
+
+    Deck* deck = deck_new();
+    assert(deck != NULL);
+
+    // Save original order
+    Card original[52];
+    for (size_t i = 0; i < 52; i++) {
+        original[i] = deck->cards[i];
+    }
+
+    // Seed random for reproducible test
+    srand(42);
+    deck_shuffle(deck);
+
+    // Check that order has changed
+    // At least one card should be in a different position
+    int order_changed = 0;
+    for (size_t i = 0; i < 52; i++) {
+        if (deck->cards[i].rank != original[i].rank ||
+            deck->cards[i].suit != original[i].suit) {
+            order_changed = 1;
+            break;
+        }
+    }
+    assert(order_changed);
+
+    deck_free(deck);
+
+    printf("  ✓ Shuffled deck has different order than original\n");
+}
+
+void test_deck_shuffle_randomness(void) {
+    printf("Testing deck_shuffle produces different results with different seeds...\n");
+
+    Deck* deck1 = deck_new();
+    Deck* deck2 = deck_new();
+    assert(deck1 != NULL && deck2 != NULL);
+
+    // Shuffle with different seeds
+    srand(12345);
+    deck_shuffle(deck1);
+
+    srand(67890);
+    deck_shuffle(deck2);
+
+    // Check that the two shuffles produced different results
+    int different = 0;
+    for (size_t i = 0; i < 52; i++) {
+        if (deck1->cards[i].rank != deck2->cards[i].rank ||
+            deck1->cards[i].suit != deck2->cards[i].suit) {
+            different = 1;
+            break;
+        }
+    }
+    assert(different);
+
+    deck_free(deck1);
+    deck_free(deck2);
+
+    printf("  ✓ Different seeds produce different shuffle results\n");
+}
+
 int main(void) {
     printf("\n=== Deck Test Suite ===\n\n");
 
@@ -158,6 +266,9 @@ int main(void) {
     test_deck_new_all_suits_represented();
     test_deck_new_all_ranks_represented();
     test_deck_new_specific_cards_present();
+    test_deck_shuffle_preserves_all_cards();
+    test_deck_shuffle_changes_order();
+    test_deck_shuffle_randomness();
 
     printf("\n=== All deck tests passed! ===\n\n");
     return 0;
