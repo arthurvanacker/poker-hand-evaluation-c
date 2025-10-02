@@ -1,6 +1,8 @@
 /* card.c - Card representation and utilities */
 
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 #include "../include/poker.h"
 
 void card_init(void) {
@@ -44,5 +46,57 @@ int card_to_string(Card card, char* buffer, size_t size) {
 
     // Use snprintf for buffer overflow protection
     snprintf(buffer, size, "%c%c", rank_char, suit_char);
+    return 0;
+}
+
+int parse_card(const char* str, Card* out_card) {
+    // Validate input pointers
+    if (str == NULL || out_card == NULL) {
+        return -1;
+    }
+
+    // Validate string length (must be exactly 2 characters)
+    size_t len = strlen(str);
+    if (len != 2) {
+        return -1;
+    }
+
+    // Parse rank character (case-insensitive)
+    char rank_char = toupper(str[0]);
+    uint8_t rank;
+
+    switch (rank_char) {
+        case '2': rank = RANK_TWO;   break;
+        case '3': rank = RANK_THREE; break;
+        case '4': rank = RANK_FOUR;  break;
+        case '5': rank = RANK_FIVE;  break;
+        case '6': rank = RANK_SIX;   break;
+        case '7': rank = RANK_SEVEN; break;
+        case '8': rank = RANK_EIGHT; break;
+        case '9': rank = RANK_NINE;  break;
+        case 'T': rank = RANK_TEN;   break;
+        case 'J': rank = RANK_JACK;  break;
+        case 'Q': rank = RANK_QUEEN; break;
+        case 'K': rank = RANK_KING;  break;
+        case 'A': rank = RANK_ACE;   break;
+        default:  return -1;
+    }
+
+    // Parse suit character (case-insensitive)
+    char suit_char = toupper(str[1]);
+    uint8_t suit;
+
+    switch (suit_char) {
+        case 'H': suit = SUIT_HEARTS;   break;
+        case 'D': suit = SUIT_DIAMONDS; break;
+        case 'C': suit = SUIT_CLUBS;    break;
+        case 'S': suit = SUIT_SPADES;   break;
+        default:  return -1;
+    }
+
+    // Set output card
+    out_card->rank = rank;
+    out_card->suit = suit;
+
     return 0;
 }
