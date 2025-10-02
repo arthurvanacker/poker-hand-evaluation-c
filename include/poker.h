@@ -177,6 +177,14 @@ int is_flush(const Card* cards, size_t len);
  */
 int is_straight(const Card* cards, size_t len, Rank* out_high_card);
 
+/**
+ * @brief Count frequency of each rank
+ * @param cards Array of cards
+ * @param len Number of cards
+ * @param counts Output array[15] to receive counts (indexed by Rank)
+ */
+void rank_counts(const Card* cards, size_t len, int* counts);
+
 /*
  * Maximum number of tiebreaker ranks in Hand struct
  */
