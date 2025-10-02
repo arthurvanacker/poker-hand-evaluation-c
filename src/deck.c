@@ -5,6 +5,7 @@
 
 #include "../include/poker.h"
 #include <stdlib.h>
+#include <string.h>
 
 /**
  * @brief Create new deck with 52 cards
@@ -96,4 +97,42 @@ void deck_shuffle(Deck* deck) {
         deck->cards[i] = deck->cards[j];
         deck->cards[j] = temp;
     }
+}
+
+/**
+ * @brief Deal cards from deck
+ *
+ * Deals the requested number of cards from the deck by copying them to the
+ * output array and reducing the deck size. Uses memcpy() for efficient bulk
+ * copy of card data. If the deck contains fewer cards than requested, only
+ * the available cards are dealt.
+ *
+ * The function deals cards from the beginning of the deck's card array
+ * (index 0). After dealing, remaining cards are moved to the beginning of
+ * the array using memmove(), and the deck's size field is reduced.
+ *
+ * @param deck Deck to deal from (must be non-NULL)
+ * @param out_cards Output array for dealt cards (caller-allocated, must have space for n cards)
+ * @param n Number of cards to deal
+ * @return Actual number of cards dealt (may be less than n if deck has fewer cards)
+ */
+size_t deck_deal(Deck* deck, Card* out_cards, size_t n) {
+    // Determine actual number of cards to deal
+    size_t actual_deal = (n < deck->size) ? n : deck->size;
+
+    // Copy cards from deck to output array using memcpy
+    if (actual_deal > 0) {
+        memcpy(out_cards, deck->cards, actual_deal * sizeof(Card));
+
+        // Move remaining cards to beginning of array
+        size_t remaining = deck->size - actual_deal;
+        if (remaining > 0) {
+            memmove(deck->cards, deck->cards + actual_deal, remaining * sizeof(Card));
+        }
+    }
+
+    // Reduce deck size by number of cards dealt
+    deck->size -= actual_deal;
+
+    return actual_deal;
 }

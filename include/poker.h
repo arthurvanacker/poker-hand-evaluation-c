@@ -121,4 +121,13 @@ void deck_free(Deck* deck);
  */
 void deck_shuffle(Deck* deck);
 
+/**
+ * @brief Deal cards from deck
+ * @param deck Deck to deal from
+ * @param out_cards Output array for dealt cards (caller-allocated)
+ * @param n Number of cards to deal
+ * @return Actual number of cards dealt (may be less if not enough cards)
+ */
+size_t deck_deal(Deck* deck, Card* out_cards, size_t n);
+
 #endif /* POKER_H */
