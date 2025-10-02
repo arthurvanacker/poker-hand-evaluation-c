@@ -160,6 +160,13 @@ void deck_shuffle(Deck* deck);
  */
 size_t deck_deal(Deck* deck, Card* out_cards, size_t n);
 
+/**
+ * @brief Check if all cards are the same suit
+ * @param cards Array of cards
+ * @param len Number of cards (must be 5)
+ * @return 1 if flush, 0 otherwise
+ */
+int is_flush(const Card* cards, size_t len);
 
 /*
  * Maximum number of tiebreaker ranks in Hand struct
