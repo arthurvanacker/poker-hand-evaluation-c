@@ -24,6 +24,15 @@ The project is built in phases:
 - Portable C99 with no external dependencies (except Unity tests)
 - Performance-optimized algorithms
 
+## Documentation
+
+Comprehensive documentation will be added as each phase completes:
+
+- **Algorithm Explained** (`docs/ALGORITHM_EXPLAINED.md`) - Detailed explanation of hand evaluation algorithms (Phase 05)
+- **Memory Safety** (`docs/MEMORY_SAFETY.md`) - Memory management practices and Valgrind verification (Phase 05)
+
+Documentation structure is established early, with content added incrementally as features are implemented.
+
 ## Status
 
 🚧 Under Development - This README will be updated as each phase completes.
