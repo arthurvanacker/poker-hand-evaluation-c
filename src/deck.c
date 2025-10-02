@@ -67,3 +67,33 @@ void deck_free(Deck* deck) {
     // Free deck structure
     free(deck);
 }
+
+/**
+ * @brief Shuffle deck using Fisher-Yates algorithm
+ *
+ * Implements the Fisher-Yates (Knuth) shuffle algorithm to randomly
+ * permute the deck in-place. The algorithm works by iterating backwards
+ * through the array, swapping each element with a randomly selected element
+ * from positions 0 to i (inclusive).
+ *
+ * Algorithm:
+ * for i from n-1 down to 1:
+ *     j = random integer with 0 <= j <= i
+ *     swap cards[i] with cards[j]
+ *
+ * This ensures each of the n! possible permutations has equal probability.
+ *
+ * @param deck Pointer to deck to shuffle (must be non-NULL)
+ */
+void deck_shuffle(Deck* deck) {
+    // Iterate backwards from last card to second card
+    for (size_t i = deck->size - 1; i > 0; i--) {
+        // Generate random index j where 0 <= j <= i
+        size_t j = rand() % (i + 1);
+
+        // Swap cards[i] with cards[j]
+        Card temp = deck->cards[i];
+        deck->cards[i] = deck->cards[j];
+        deck->cards[j] = temp;
+    }
+}
