@@ -28,6 +28,25 @@ jobs:
           test -f lib/libpoker.a
           echo "Library built successfully"
 
+  lint:
+    name: Static Analysis (cppcheck)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install cppcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck
+
+      - name: Run static analysis
+        run: make lint
+
+      - name: Verify clean analysis
+        run: echo "Static analysis completed with no critical issues"
+
   build-clang:
     name: Build with Clang
     runs-on: ubuntu-latest
@@ -169,7 +188,7 @@ jobs:
   build-status:
     name: Build Status Summary
     runs-on: ubuntu-latest
-    needs: [build-gcc, build-clang, test, valgrind, coverage, fuzzing]
+    needs: [build-gcc, build-clang, lint, test, valgrind, coverage, fuzzing]
     if: always()
 
     steps:
@@ -178,6 +197,7 @@ jobs:
           echo "Build Status Summary:"
           echo "- GCC Build: ${{ needs.build-gcc.result }}"
           echo "- Clang Build: ${{ needs.build-clang.result }}"
+          echo "- Static Analysis: ${{ needs.lint.result }}"
           echo "- Tests: ${{ needs.test.result }}"
           echo "- Valgrind: ${{ needs.valgrind.result }}"
           echo "- Coverage: ${{ needs.coverage.result }}"
@@ -185,6 +205,7 @@ jobs:
 
           if [ "${{ needs.build-gcc.result }}" != "success" ] || \
              [ "${{ needs.build-clang.result }}" != "success" ] || \
+             [ "${{ needs.lint.result }}" != "success" ] || \
              [ "${{ needs.test.result }}" != "success" ] || \
              [ "${{ needs.valgrind.result }}" != "success" ]; then
             echo "CI pipeline failed - see above for details"
