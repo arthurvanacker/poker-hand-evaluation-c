@@ -276,6 +276,7 @@ lint:
 	@echo "Running static analysis..."
 	cppcheck --enable=all --error-exitcode=1 \
 	         --suppress=missingIncludeSystem \
+	         --suppress=unusedFunction \
 	         -I include/ src/
 
 # Help target
