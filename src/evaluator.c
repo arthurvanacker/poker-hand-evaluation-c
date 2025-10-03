@@ -283,7 +283,170 @@ int detect_royal_flush(const Card* cards, size_t len) {
     return 0;
 }
 
+/**
+ * @brief Detect full house
+ *
+ * Detects if the hand contains a full house (three of a kind + pair).
+ * Returns tiebreakers in the format: [trip_rank, pair_rank].
+ *
+ * The function validates all input parameters and handles the optional counts
+ * parameter by computing counts internally if NULL is provided.
+ *
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param counts Optional pre-computed rank counts (can be NULL)
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if full house, 0 otherwise
+ */
+int detect_full_house(const Card* cards, size_t len,
+                      const int* counts,
+                      Rank* out_tiebreakers,
+                      size_t* out_num_tiebreakers) {
+    /* Validate input parameters */
+    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+        return 0;
+    }
+
+    /* Use provided counts or compute locally */
+    int local_counts[15];
+    const int* rank_count_array;
+
+    if (counts == NULL) {
+        rank_counts(cards, len, local_counts);
+        rank_count_array = local_counts;
+    } else {
+        rank_count_array = counts;
+    }
+
+    /* Find the trip rank (count == 3) */
+    Rank trip_rank = 0;
+    for (int rank = RANK_TWO; rank <= RANK_ACE; rank++) {
+        if (rank_count_array[rank] == 3) {
+            trip_rank = (Rank)rank;
+            break;
+        }
+    }
+
+    /* No trip found */
+    if (trip_rank == 0) {
+        return 0;
+    }
+
+    /* Find the pair rank (count == 2) */
+    Rank pair_rank = 0;
+    for (int rank = RANK_TWO; rank <= RANK_ACE; rank++) {
+        if (rank_count_array[rank] == 2) {
+            pair_rank = (Rank)rank;
+            break;
+        }
+    }
+
+    /* No pair found */
+    if (pair_rank == 0) {
+        return 0;
+    }
+
+    /* Write tiebreakers: [trip_rank, pair_rank] */
+    out_tiebreakers[0] = trip_rank;
+    out_tiebreakers[1] = pair_rank;
+    *out_num_tiebreakers = 2;
+
+    return 1;
+}
+
 int evaluate_hand(void) {
     /* Placeholder for hand evaluation */
     return 0;
+}
+
+/**
+ * @brief Detect flush (non-straight)
+ *
+ * Detects if the hand is a flush (5 suited cards, non-sequential).
+ * Uses is_flush() to verify all cards have the same suit, then uses
+ * is_straight() to exclude straight flushes. Returns all 5 ranks in
+ * descending order as tiebreakers.
+ *
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if flush, 0 otherwise
+ */
+int detect_flush(const Card* cards, size_t len,
+                 Rank* out_tiebreakers,
+                 size_t* out_num_tiebreakers) {
+    /* Validate input parameters */
+    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+        return 0;
+    }
+
+    /* Check if all cards are the same suit (flush) */
+    if (!is_flush(cards, len)) {
+        return 0;
+    }
+
+    /* Exclude straight flushes (return 0 if straight) */
+    if (is_straight(cards, len, NULL)) {
+        return 0;
+    }
+
+    /* Extract ranks into array */
+    Rank ranks[5];
+    for (size_t i = 0; i < 5; i++) {
+        ranks[i] = (Rank)cards[i].rank;
+    }
+
+    /* Sort ranks in descending order */
+    qsort(ranks, 5, sizeof(Rank), rank_compare_desc);
+
+    /* Write all 5 ranks to tiebreakers */
+    for (size_t i = 0; i < 5; i++) {
+        out_tiebreakers[i] = ranks[i];
+    }
+
+    /* Set number of tiebreakers to 5 */
+    *out_num_tiebreakers = 5;
+
+    return 1;
+}
+
+/**
+ * @brief Detect straight (non-flush)
+ *
+ * Detects if the hand is a straight but NOT a flush (excludes straight flushes).
+ * Uses is_flush() to reject flushes, then is_straight() to detect sequential ranks.
+ * Returns the high card as a tiebreaker (RANK_FIVE for wheel straight).
+ *
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if straight (non-flush), 0 otherwise
+ */
+int detect_straight(const Card* cards, size_t len,
+                    Rank* out_tiebreakers,
+                    size_t* out_num_tiebreakers) {
+    /* Validate input parameters */
+    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+        return 0;
+    }
+
+    /* Check if it's a flush - if so, return 0 (exclude straight flushes) */
+    if (is_flush(cards, len)) {
+        return 0;
+    }
+
+    /* Check if cards form a straight */
+    Rank high_card;
+    if (!is_straight(cards, len, &high_card)) {
+        return 0;
+    }
+
+    /* Write tiebreaker: [high_card] */
+    out_tiebreakers[0] = high_card;
+    *out_num_tiebreakers = 1;
+
+    return 1;
 }

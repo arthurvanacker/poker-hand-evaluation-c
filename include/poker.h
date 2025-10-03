@@ -200,6 +200,20 @@ int detect_four_of_a_kind(const Card* cards, size_t len,
                            size_t* out_num_tiebreakers);
 
 /**
+ * @brief Detect full house
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param counts Optional pre-computed rank counts (can be NULL)
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if full house, 0 otherwise
+ */
+int detect_full_house(const Card* cards, size_t len,
+                      const int* counts,
+                      Rank* out_tiebreakers,
+                      size_t* out_num_tiebreakers);
+
+/**
  * @brief Detect straight flush
  * @param cards Array of exactly 5 cards
  * @param len Must be 5
@@ -215,6 +229,30 @@ int detect_straight_flush(const Card* cards, size_t len, Rank* out_high_card);
  * @return 1 if royal flush, 0 otherwise
  */
 int detect_royal_flush(const Card* cards, size_t len);
+
+/**
+ * @brief Detect flush (non-straight)
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if flush, 0 otherwise
+ */
+int detect_flush(const Card* cards, size_t len,
+                 Rank* out_tiebreakers,
+                 size_t* out_num_tiebreakers);
+
+/**
+ * @brief Detect straight (non-flush)
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if straight, 0 otherwise
+ */
+int detect_straight(const Card* cards, size_t len,
+                    Rank* out_tiebreakers,
+                    size_t* out_num_tiebreakers);
 
 /*
  * Maximum number of tiebreaker ranks in Hand struct
