@@ -1,5 +1,7 @@
 # Poker Hand Evaluator (C)
 
+[![CI](https://github.com/arthurvanacker/poker-hand-evaluation-c/actions/workflows/ci.yml/badge.svg)](https://github.com/arthurvanacker/poker-hand-evaluation-c/actions/workflows/ci.yml)
+
 A Texas Hold'em poker hand evaluator written in C.
 
 ## Planned Features

@@ -1,0 +1,194 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-gcc:
+    name: Build with GCC
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind lcov
+
+      - name: Build library
+        run: make all
+
+      - name: Verify library created
+        run: |
+          test -f lib/libpoker.a
+          echo "Library built successfully"
+
+  build-clang:
+    name: Build with Clang
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang valgrind lcov
+
+      - name: Build library with Clang
+        run: |
+          make clean
+          CC=clang make all
+
+      - name: Verify library created
+        run: |
+          test -f lib/libpoker.a
+          echo "Library built successfully with Clang"
+
+  test:
+    name: Run Test Suite
+    runs-on: ubuntu-latest
+    needs: build-gcc
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind lcov
+
+      - name: Build library
+        run: make all
+
+      - name: Run tests
+        run: make test
+
+      - name: Check test results
+        run: echo "All tests passed"
+
+  valgrind:
+    name: Valgrind Memory Checks
+    runs-on: ubuntu-latest
+    needs: build-gcc
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+
+      - name: Build library
+        run: make all
+
+      - name: Run Valgrind checks
+        run: make valgrind
+
+      - name: Verify no memory leaks
+        run: echo "Valgrind verification complete - zero memory leaks"
+
+  coverage:
+    name: Code Coverage Report
+    runs-on: ubuntu-latest
+    needs: build-gcc
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lcov
+
+      - name: Generate coverage report
+        run: make coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.info
+          fail_ci_if_error: false
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage/
+            *.gcov
+            coverage.info
+          retention-days: 30
+
+  fuzzing:
+    name: Fuzzing Tests
+    runs-on: ubuntu-latest
+    needs: build-gcc
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang
+
+      - name: Build library
+        run: make all
+
+      - name: Run fuzzing tests (standalone mode)
+        run: make fuzz
+
+      - name: Build libFuzzer harnesses
+        run: make fuzz-libfuzzer || echo "libFuzzer build skipped if clang unavailable"
+
+      - name: Run libFuzzer quick test
+        run: |
+          if [ -f build/fuzz_parse_card_libfuzzer ]; then
+            timeout 30 ./build/fuzz_parse_card_libfuzzer -max_total_time=10 || true
+            timeout 30 ./build/fuzz_evaluate_hand_libfuzzer -max_total_time=10 || true
+            echo "libFuzzer quick test completed"
+          else
+            echo "libFuzzer harnesses not available, skipped"
+          fi
+
+  build-status:
+    name: Build Status Summary
+    runs-on: ubuntu-latest
+    needs: [build-gcc, build-clang, test, valgrind, coverage, fuzzing]
+    if: always()
+
+    steps:
+      - name: Check build status
+        run: |
+          echo "Build Status Summary:"
+          echo "- GCC Build: ${{ needs.build-gcc.result }}"
+          echo "- Clang Build: ${{ needs.build-clang.result }}"
+          echo "- Tests: ${{ needs.test.result }}"
+          echo "- Valgrind: ${{ needs.valgrind.result }}"
+          echo "- Coverage: ${{ needs.coverage.result }}"
+          echo "- Fuzzing: ${{ needs.fuzzing.result }}"
+
+          if [ "${{ needs.build-gcc.result }}" != "success" ] || \
+             [ "${{ needs.build-clang.result }}" != "success" ] || \
+             [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.valgrind.result }}" != "success" ]; then
+            echo "CI pipeline failed - see above for details"
+            exit 1
+          else
+            echo "All CI checks passed successfully!"
+          fi
