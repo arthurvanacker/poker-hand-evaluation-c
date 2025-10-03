@@ -296,6 +296,18 @@ int detect_straight(const Card* cards, size_t len,
                     Rank* out_tiebreakers,
                     size_t* out_num_tiebreakers);
 
+/**
+ * @brief Detect high card (always succeeds for valid input)
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if valid 5-card input, 0 otherwise
+ */
+int detect_high_card(const Card* cards, size_t len,
+                     Rank* out_tiebreakers,
+                     size_t* out_num_tiebreakers);
+
 /*
  * Maximum number of tiebreaker ranks in Hand struct
  */
