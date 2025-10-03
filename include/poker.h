@@ -185,6 +185,14 @@ int is_straight(const Card* cards, size_t len, Rank* out_high_card);
  */
 void rank_counts(const Card* cards, size_t len, int* counts);
 
+/**
+ * @brief Detect royal flush
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @return 1 if royal flush, 0 otherwise
+ */
+int detect_royal_flush(const Card* cards, size_t len);
+
 /*
  * Maximum number of tiebreaker ranks in Hand struct
  */
