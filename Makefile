@@ -30,6 +30,16 @@ LIB = lib/libpoker.a
 .PHONY: all
 all: $(LIB)
 
+# Debug build - with symbols and no optimization
+.PHONY: debug
+debug: CFLAGS += -g -O0 -DDEBUG
+debug: all
+
+# Release build - optimized for performance
+.PHONY: release
+release: CFLAGS += -O3 -DNDEBUG -march=native
+release: all
+
 # Build static library
 $(LIB): $(OBJ) | $(LIB_DIR)
 	$(AR) $(ARFLAGS) $@ $^
@@ -210,6 +220,8 @@ help:
 	@echo ""
 	@echo "Available targets:"
 	@echo "  all            - Build static library (default)"
+	@echo "  debug          - Build with debug symbols (-g -O0 -DDEBUG)"
+	@echo "  release        - Build optimized release (-O3 -DNDEBUG -march=native)"
 	@echo "  test           - Build and run tests"
 	@echo "  valgrind       - Run Valgrind memory leak verification on all tests"
 	@echo "  fuzz           - Build and run fuzzing tests (standalone mode)"
