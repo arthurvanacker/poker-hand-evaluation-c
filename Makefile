@@ -15,6 +15,7 @@ LIB_DIR = lib
 INCLUDE_DIR = include
 TEST_DIR = tests
 EXAMPLES_DIR = examples
+FUZZ_DIR = fuzz
 
 # Source files
 SRC = src/card.c src/deck.c src/evaluator.c
@@ -133,16 +134,88 @@ valgrind: all
 		echo "✅ All tests passed - zero memory leaks!"; \
 	fi
 
+# Fuzzing targets - Security hardening with fuzzing
+.PHONY: fuzz-standalone
+fuzz-standalone: all
+	@echo "Building fuzzing harnesses (standalone mode)..."
+	@echo "=============================================="
+	@echo ""
+	@# Build fuzz_parse_card
+	@echo "Building fuzz_parse_card..."
+	$(CC) $(CFLAGS) -DFUZZ_STANDALONE $(FUZZ_DIR)/fuzz_parse_card.c $(LIB) -o $(BUILD_DIR)/fuzz_parse_card
+	@echo "✓ Built: $(BUILD_DIR)/fuzz_parse_card"
+	@echo ""
+	@# Build fuzz_evaluate_hand
+	@echo "Building fuzz_evaluate_hand..."
+	$(CC) $(CFLAGS) -DFUZZ_STANDALONE $(FUZZ_DIR)/fuzz_evaluate_hand.c $(LIB) -o $(BUILD_DIR)/fuzz_evaluate_hand
+	@echo "✓ Built: $(BUILD_DIR)/fuzz_evaluate_hand"
+	@echo ""
+	@echo "=============================================="
+	@echo "Fuzzing harnesses built successfully!"
+	@echo ""
+	@echo "Run fuzzing tests:"
+	@echo "  $(BUILD_DIR)/fuzz_parse_card"
+	@echo "  $(BUILD_DIR)/fuzz_evaluate_hand"
+
+.PHONY: fuzz-libfuzzer
+fuzz-libfuzzer: all
+	@echo "Building fuzzing harnesses (libFuzzer mode)..."
+	@echo "=============================================="
+	@echo ""
+	@echo "Note: Requires clang with libFuzzer support"
+	@echo ""
+	@# Check if clang is available
+	@if ! command -v clang > /dev/null 2>&1; then \
+		echo "❌ clang not found - install with: sudo apt-get install clang"; \
+		echo ""; \
+		echo "For now, use 'make fuzz-standalone' to build gcc-based fuzzers"; \
+		exit 1; \
+	fi
+	@echo "Building fuzz_parse_card with libFuzzer..."
+	clang -fsanitize=fuzzer,address,undefined -I$(INCLUDE_DIR) $(FUZZ_DIR)/fuzz_parse_card.c $(LIB) -o $(BUILD_DIR)/fuzz_parse_card_libfuzzer
+	@echo "✓ Built: $(BUILD_DIR)/fuzz_parse_card_libfuzzer"
+	@echo ""
+	@echo "Building fuzz_evaluate_hand with libFuzzer..."
+	clang -fsanitize=fuzzer,address,undefined -I$(INCLUDE_DIR) $(FUZZ_DIR)/fuzz_evaluate_hand.c $(LIB) -o $(BUILD_DIR)/fuzz_evaluate_hand_libfuzzer
+	@echo "✓ Built: $(BUILD_DIR)/fuzz_evaluate_hand_libfuzzer"
+	@echo ""
+	@echo "=============================================="
+	@echo "libFuzzer harnesses built successfully!"
+	@echo ""
+	@echo "Run fuzzing campaigns:"
+	@echo "  $(BUILD_DIR)/fuzz_parse_card_libfuzzer -max_total_time=3600"
+	@echo "  $(BUILD_DIR)/fuzz_evaluate_hand_libfuzzer -max_total_time=3600"
+
+.PHONY: fuzz
+fuzz: fuzz-standalone
+	@echo ""
+	@echo "Running fuzzing tests..."
+	@echo "=============================================="
+	@echo ""
+	@echo "Testing fuzz_parse_card..."
+	@echo "----------------------------------------"
+	@$(BUILD_DIR)/fuzz_parse_card
+	@echo ""
+	@echo "Testing fuzz_evaluate_hand..."
+	@echo "----------------------------------------"
+	@$(BUILD_DIR)/fuzz_evaluate_hand
+	@echo ""
+	@echo "=============================================="
+	@echo "✅ All fuzzing tests completed successfully!"
+
 # Help target
 .PHONY: help
 help:
 	@echo "Poker Hand Evaluation Library - Build System"
 	@echo ""
 	@echo "Available targets:"
-	@echo "  all       - Build static library (default)"
-	@echo "  test      - Build and run tests"
-	@echo "  valgrind  - Run Valgrind memory leak verification on all tests"
-	@echo "  examples  - Build example programs"
-	@echo "  clean     - Remove build artifacts"
-	@echo "  install   - Install library and headers"
-	@echo "  help      - Display this help message"
+	@echo "  all            - Build static library (default)"
+	@echo "  test           - Build and run tests"
+	@echo "  valgrind       - Run Valgrind memory leak verification on all tests"
+	@echo "  fuzz           - Build and run fuzzing tests (standalone mode)"
+	@echo "  fuzz-standalone- Build fuzzing harnesses with gcc (no libFuzzer)"
+	@echo "  fuzz-libfuzzer - Build fuzzing harnesses with clang + libFuzzer"
+	@echo "  examples       - Build example programs"
+	@echo "  clean          - Remove build artifacts"
+	@echo "  install        - Install library and headers"
+	@echo "  help           - Display this help message"
