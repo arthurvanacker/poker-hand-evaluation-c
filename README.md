@@ -665,6 +665,101 @@ Fuzzing helps prevent:
 - AddressSanitizer: https://clang.llvm.org/docs/AddressSanitizer.html
 - Fuzzing best practices: https://google.github.io/fuzzing/
 
+## Code Coverage
+
+This project uses gcov and lcov to track test coverage and ensure comprehensive testing of all source code.
+
+### Current Coverage
+
+- **Overall**: 96.38% line coverage across all source files
+- **card.c**: 93.33% (60 lines)
+- **deck.c**: 92.50% (40 lines)
+- **evaluator.c**: 97.68% (259 lines)
+
+The project maintains a minimum coverage target of ≥90% to ensure code quality and reliability.
+
+### Generating Coverage Reports
+
+Generate coverage reports with a single command:
+
+```bash
+make coverage
+```
+
+This command:
+1. Rebuilds the library with coverage instrumentation (`--coverage` flag)
+2. Runs all test executables to collect coverage data
+3. Generates `.gcov` files showing line-by-line coverage
+4. Creates HTML report (if lcov is installed)
+
+### Viewing Coverage Results
+
+**Text-based coverage (always available):**
+```bash
+# View coverage summary
+cat *.gcov | grep -E "^(File|Lines executed|Creating)"
+
+# View detailed line coverage for a specific file
+cat card.c.gcov | less
+```
+
+**HTML coverage report (requires lcov):**
+```bash
+# Install lcov (one-time setup)
+sudo apt-get install lcov
+
+# Generate and view HTML report
+make coverage
+firefox coverage/index.html
+```
+
+The HTML report provides:
+- Interactive file browser with color-coded coverage
+- Line-by-line execution counts
+- Branch coverage visualization
+- Sortable coverage tables
+
+### Coverage Files
+
+The coverage target generates these artifacts:
+- `*.gcov` - Line-by-line coverage data for each source file
+- `coverage.info` - Aggregated coverage data (lcov format)
+- `coverage/` - HTML coverage report directory
+
+All coverage artifacts are ignored by git (see `.gitignore`).
+
+### Interpreting Coverage Results
+
+Each `.gcov` file shows:
+- Execution counts for each line (number on the left)
+- `#####` for lines that were never executed
+- `-` for non-executable lines (comments, declarations)
+
+**Example:**
+```
+        -:   10:/* Returns 1 if flush, 0 otherwise */
+       42:   11:int is_flush(const Card* cards, size_t len) {
+       42:   12:    if (len != 5) return 0;
+       40:   13:    Suit first = cards[0].suit;
+    #####:   14:    for (size_t i = 1; i < len; i++) {
+```
+
+This shows line 14 was never executed (likely unreachable code or edge case).
+
+### Coverage in CI/CD
+
+The coverage target is designed for integration with continuous integration:
+
+```bash
+# Run coverage and verify target met
+make coverage
+if grep -q "Lines executed:[0-9.]*% of" *.gcov; then
+    echo "Coverage target met"
+else
+    echo "Coverage below target" && exit 1
+fi
+```
+
 ## Status
 
 ✅ **Phase 00 Complete** - Project structure, build system, and documentation framework established
