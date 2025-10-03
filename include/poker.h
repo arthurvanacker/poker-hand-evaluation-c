@@ -125,8 +125,24 @@ Deck* deck_new(void);
  * Safe to call with NULL pointer (no-op). After calling this function,
  * the deck pointer becomes invalid and must not be used.
  *
+ * This function implements NULL poisoning for the internal cards array
+ * to prevent double-free vulnerabilities. However, the deck pointer itself
+ * is freed and becomes invalid.
+ *
  * @param deck Pointer to deck to free (can be NULL)
- * @warning Deck pointer is invalid after calling this function
+ *
+ * @warning Deck pointer is invalid after calling this function. Caller
+ *          must set deck = NULL to prevent use-after-free errors.
+ *
+ * @par Defensive Programming - Preventing Double-Free:
+ * To safely use this function and prevent double-free errors, always set
+ * the deck pointer to NULL after calling deck_free():
+ * @code
+ *     Deck* deck = deck_new();
+ *     // ... use deck ...
+ *     deck_free(deck);
+ *     deck = NULL;  // REQUIRED: Prevents accidental double-free
+ * @endcode
  */
 void deck_free(Deck* deck);
 

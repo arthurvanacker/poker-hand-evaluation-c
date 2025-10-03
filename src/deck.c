@@ -53,16 +53,25 @@ Deck* deck_new(void) {
  * Deallocates the cards array and the deck structure itself.
  * Safe to call with NULL pointer (no-op).
  *
+ * Implements NULL poisoning: sets deck->cards to NULL after freeing
+ * to prevent double-free vulnerabilities. Since free(NULL) is a no-op,
+ * this makes accidental double-free calls safe for the cards array.
+ *
  * @param deck Pointer to deck to free
+ *
+ * @note After calling this function, the deck pointer becomes invalid
+ *       and must not be used. Caller should set deck = NULL to prevent
+ *       use-after-free errors.
  */
 void deck_free(Deck* deck) {
     if (deck == NULL) {
         return;
     }
 
-    // Free cards array
+    // Free cards array and set to NULL (NULL poisoning)
     if (deck->cards != NULL) {
         free(deck->cards);
+        deck->cards = NULL;  // Prevent double-free
     }
 
     // Free deck structure
