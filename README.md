@@ -225,11 +225,221 @@ The helper functions use C standard library features:
 - Array-based counting (not HashMap) for rank frequency analysis
 - Fixed-size arrays to avoid dynamic allocation
 
+## Detection Layer
+
+The detection layer provides 10 specialized functions to identify specific poker hand categories. Each detector returns 1 if the hand matches the category, 0 otherwise. Most detectors also populate output parameters with tiebreaker ranks used for comparing hands of the same category.
+
+### Return Codes
+
+All detection functions follow a consistent return convention:
+- **1** = Hand matches this category
+- **0** = Hand does not match this category
+
+### Output Parameters
+
+Detection functions use C-style output parameters to return tiebreaker information:
+
+- **`out_tiebreakers`**: Array to receive tiebreaker ranks (caller-allocated, must hold at least `MAX_TIEBREAKERS` elements)
+- **`out_num_tiebreakers`**: Pointer to receive the count of valid tiebreaker ranks
+- **`out_high_card`**: Pointer to receive the high card rank (used by straight-based detectors)
+
+Tiebreaker ranks are stored in descending order of importance for hand comparison.
+
+### Detection Functions
+
+#### detect_royal_flush()
+
+```c
+int detect_royal_flush(const Card* cards, size_t len);
+```
+
+Detects royal flush (A-K-Q-J-T of the same suit). Returns 1 if detected, 0 otherwise.
+
+**Tiebreakers:** None (royal flush has no tiebreakers - all royal flushes tie)
+
+**Example:**
+- `Ah Kh Qh Jh Th` → Returns 1
+
+#### detect_straight_flush()
+
+```c
+int detect_straight_flush(const Card* cards, size_t len, Rank* out_high_card);
+```
+
+Detects straight flush (5 consecutive ranks, same suit, not royal flush). Returns 1 if detected, 0 otherwise.
+
+**Tiebreakers:** `[high_card]`
+- `high_card`: The highest rank in the straight
+
+**Wheel Straight Special Case:** For A-2-3-4-5 straight flush (wheel), the high card is `RANK_FIVE` (not `RANK_ACE`), following standard poker rules.
+
+**Example:**
+- `9s 8s 7s 6s 5s` → Returns 1, `out_high_card = RANK_NINE`
+- `5d 4d 3d 2d Ad` → Returns 1, `out_high_card = RANK_FIVE` (wheel)
+
+#### detect_four_of_a_kind()
+
+```c
+int detect_four_of_a_kind(const Card* cards, size_t len,
+                           const int* counts,
+                           Rank* out_tiebreakers,
+                           size_t* out_num_tiebreakers);
+```
+
+Detects four of a kind (4 cards of the same rank). Returns 1 if detected, 0 otherwise.
+
+**Tiebreakers:** `[quad_rank, kicker]`
+- `quad_rank`: The rank of the four-of-a-kind
+- `kicker`: The rank of the remaining card
+
+**Example:**
+- `Ks Kh Kd Kc 7h` → Returns 1, tiebreakers = `[RANK_KING, RANK_SEVEN]`
+
+#### detect_full_house()
+
+```c
+int detect_full_house(const Card* cards, size_t len,
+                      const int* counts,
+                      Rank* out_tiebreakers,
+                      size_t* out_num_tiebreakers);
+```
+
+Detects full house (3 cards of one rank, 2 cards of another rank). Returns 1 if detected, 0 otherwise.
+
+**Tiebreakers:** `[trip_rank, pair_rank]`
+- `trip_rank`: The rank of the three-of-a-kind
+- `pair_rank`: The rank of the pair
+
+**Example:**
+- `Jd Jc Jh 8s 8d` → Returns 1, tiebreakers = `[RANK_JACK, RANK_EIGHT]`
+
+#### detect_flush()
+
+```c
+int detect_flush(const Card* cards, size_t len,
+                 Rank* out_tiebreakers,
+                 size_t* out_num_tiebreakers);
+```
+
+Detects flush (5 cards of the same suit, not a straight). Returns 1 if detected, 0 otherwise.
+
+**Tiebreakers:** `[r1, r2, r3, r4, r5]`
+- All 5 card ranks in descending order
+
+**Example:**
+- `Kh Jh 9h 6h 2h` → Returns 1, tiebreakers = `[RANK_KING, RANK_JACK, RANK_NINE, RANK_SIX, RANK_TWO]`
+
+**Note:** Uses `qsort()` to sort ranks in descending order before storing tiebreakers.
+
+#### detect_straight()
+
+```c
+int detect_straight(const Card* cards, size_t len,
+                    Rank* out_tiebreakers,
+                    size_t* out_num_tiebreakers);
+```
+
+Detects straight (5 consecutive ranks, not all the same suit). Returns 1 if detected, 0 otherwise.
+
+**Tiebreakers:** `[high_card]`
+- `high_card`: The highest rank in the straight
+
+**Wheel Straight Special Case:** For A-2-3-4-5 straight (wheel), the high card is `RANK_FIVE` (not `RANK_ACE`).
+
+**Example:**
+- `9c 8h 7d 6s 5c` → Returns 1, tiebreakers = `[RANK_NINE]`
+- `5h 4d 3c 2s Ah` → Returns 1, tiebreakers = `[RANK_FIVE]` (wheel)
+
+#### detect_three_of_a_kind()
+
+```c
+int detect_three_of_a_kind(const Card* cards, size_t len,
+                            const int* counts,
+                            Rank* out_tiebreakers,
+                            size_t* out_num_tiebreakers);
+```
+
+Detects three of a kind (3 cards of the same rank, no pair). Returns 1 if detected, 0 otherwise.
+
+**Tiebreakers:** `[trip_rank, k1, k2]`
+- `trip_rank`: The rank of the three-of-a-kind
+- `k1`, `k2`: The two kicker ranks in descending order
+
+**Example:**
+- `Qh Qd Qc Ts 7h` → Returns 1, tiebreakers = `[RANK_QUEEN, RANK_TEN, RANK_SEVEN]`
+
+#### detect_two_pair()
+
+```c
+int detect_two_pair(const Card* cards, size_t len,
+                    const int* counts,
+                    Rank* out_tiebreakers,
+                    size_t* out_num_tiebreakers);
+```
+
+Detects two pair (2 cards of one rank, 2 cards of another rank). Returns 1 if detected, 0 otherwise.
+
+**Tiebreakers:** `[high_pair, low_pair, kicker]`
+- `high_pair`: The rank of the higher pair
+- `low_pair`: The rank of the lower pair
+- `kicker`: The rank of the remaining card
+
+**Example:**
+- `Ah Ad 9c 9s 5h` → Returns 1, tiebreakers = `[RANK_ACE, RANK_NINE, RANK_FIVE]`
+
+#### detect_one_pair()
+
+```c
+int detect_one_pair(const Card* cards, size_t len,
+                    const int* counts,
+                    Rank* out_tiebreakers,
+                    size_t* out_num_tiebreakers);
+```
+
+Detects one pair (2 cards of the same rank, no other pairs). Returns 1 if detected, 0 otherwise.
+
+**Tiebreakers:** `[pair_rank, k1, k2, k3]`
+- `pair_rank`: The rank of the pair
+- `k1`, `k2`, `k3`: The three kicker ranks in descending order
+
+**Example:**
+- `Tc Th 8d 6s 3c` → Returns 1, tiebreakers = `[RANK_TEN, RANK_EIGHT, RANK_SIX, RANK_THREE]`
+
+#### detect_high_card()
+
+```c
+int detect_high_card(const Card* cards, size_t len,
+                     Rank* out_tiebreakers,
+                     size_t* out_num_tiebreakers);
+```
+
+Detects high card (no other hand category). Always returns 1 for valid 5-card input.
+
+**Tiebreakers:** `[r1, r2, r3, r4, r5]`
+- All 5 card ranks in descending order
+
+**Example:**
+- `Kd Jc 9h 7s 3d` → Returns 1, tiebreakers = `[RANK_KING, RANK_JACK, RANK_NINE, RANK_SEVEN, RANK_THREE]`
+
+**Note:** Uses `qsort()` to sort ranks in descending order before storing tiebreakers.
+
+### Implementation Notes
+
+**Sorting with qsort():**
+The detection functions use `qsort()` from `<stdlib.h>` to sort ranks in descending order when needed (flush, high card, and internally for straight detection).
+
+**Wheel Straight Special Case:**
+The A-2-3-4-5 straight (wheel) is treated specially in poker. The ace acts as a low card, making the five the high card. Both `detect_straight()` and `detect_straight_flush()` correctly handle this edge case by returning `RANK_FIVE` as the high card.
+
+**Optional Pre-computed Counts:**
+Functions that analyze rank patterns (four of a kind, full house, three of a kind, two pair, one pair) accept an optional `counts` parameter. If `NULL`, the function computes counts internally using `rank_counts()`. If provided, the function uses the pre-computed counts for efficiency.
+
 ## Status
 
 ✅ **Phase 0 Complete** - Project structure, build system, and documentation framework established
 ✅ **Phase 1 Complete** - Foundation layer (Rank, Suit, Card, Deck) with full test coverage
 ✅ **Phase 2 Complete** - Evaluation core (HandCategory, Hand, helper functions) with comprehensive tests
+✅ **Phase 3 Complete** - Detection layer (10 hand category detectors from Royal Flush to High Card)
 🚧 Under Development - This README will be updated as each phase completes.
 
 ## License
