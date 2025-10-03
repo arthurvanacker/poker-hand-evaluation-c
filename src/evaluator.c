@@ -359,3 +359,94 @@ int evaluate_hand(void) {
     /* Placeholder for hand evaluation */
     return 0;
 }
+
+/**
+ * @brief Detect flush (non-straight)
+ *
+ * Detects if the hand is a flush (5 suited cards, non-sequential).
+ * Uses is_flush() to verify all cards have the same suit, then uses
+ * is_straight() to exclude straight flushes. Returns all 5 ranks in
+ * descending order as tiebreakers.
+ *
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if flush, 0 otherwise
+ */
+int detect_flush(const Card* cards, size_t len,
+                 Rank* out_tiebreakers,
+                 size_t* out_num_tiebreakers) {
+    /* Validate input parameters */
+    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+        return 0;
+    }
+
+    /* Check if all cards are the same suit (flush) */
+    if (!is_flush(cards, len)) {
+        return 0;
+    }
+
+    /* Exclude straight flushes (return 0 if straight) */
+    if (is_straight(cards, len, NULL)) {
+        return 0;
+    }
+
+    /* Extract ranks into array */
+    Rank ranks[5];
+    for (size_t i = 0; i < 5; i++) {
+        ranks[i] = (Rank)cards[i].rank;
+    }
+
+    /* Sort ranks in descending order */
+    qsort(ranks, 5, sizeof(Rank), rank_compare_desc);
+
+    /* Write all 5 ranks to tiebreakers */
+    for (size_t i = 0; i < 5; i++) {
+        out_tiebreakers[i] = ranks[i];
+    }
+
+    /* Set number of tiebreakers to 5 */
+    *out_num_tiebreakers = 5;
+
+    return 1;
+}
+
+/**
+ * @brief Detect straight (non-flush)
+ *
+ * Detects if the hand is a straight but NOT a flush (excludes straight flushes).
+ * Uses is_flush() to reject flushes, then is_straight() to detect sequential ranks.
+ * Returns the high card as a tiebreaker (RANK_FIVE for wheel straight).
+ *
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if straight (non-flush), 0 otherwise
+ */
+int detect_straight(const Card* cards, size_t len,
+                    Rank* out_tiebreakers,
+                    size_t* out_num_tiebreakers) {
+    /* Validate input parameters */
+    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+        return 0;
+    }
+
+    /* Check if it's a flush - if so, return 0 (exclude straight flushes) */
+    if (is_flush(cards, len)) {
+        return 0;
+    }
+
+    /* Check if cards form a straight */
+    Rank high_card;
+    if (!is_straight(cards, len, &high_card)) {
+        return 0;
+    }
+
+    /* Write tiebreaker: [high_card] */
+    out_tiebreakers[0] = high_card;
+    *out_num_tiebreakers = 1;
+
+    return 1;
+}

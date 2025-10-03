@@ -230,6 +230,30 @@ int detect_straight_flush(const Card* cards, size_t len, Rank* out_high_card);
  */
 int detect_royal_flush(const Card* cards, size_t len);
 
+/**
+ * @brief Detect flush (non-straight)
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if flush, 0 otherwise
+ */
+int detect_flush(const Card* cards, size_t len,
+                 Rank* out_tiebreakers,
+                 size_t* out_num_tiebreakers);
+
+/**
+ * @brief Detect straight (non-flush)
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if straight, 0 otherwise
+ */
+int detect_straight(const Card* cards, size_t len,
+                    Rank* out_tiebreakers,
+                    size_t* out_num_tiebreakers);
+
 /*
  * Maximum number of tiebreaker ranks in Hand struct
  */
