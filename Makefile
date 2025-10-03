@@ -90,7 +90,64 @@ install: all
 clean:
 	rm -rf $(BUILD_DIR)/*.o
 	rm -rf $(LIB)
+	rm -rf *.gcda *.gcno *.gcov
+	rm -rf $(BUILD_DIR)/*.gcda $(BUILD_DIR)/*.gcno
+	rm -rf coverage.info coverage/
 	@echo "Cleaned build artifacts"
+
+# Coverage target - generate code coverage reports
+.PHONY: coverage
+coverage: CFLAGS += --coverage
+coverage: LDFLAGS += --coverage
+coverage: clean all
+	@echo "Running tests with coverage..."
+	@echo "=============================================="
+	@echo ""
+	@# Build and run all test files
+	@TEST_FILES=$$(find $(TEST_DIR) -maxdepth 1 -name "test_*.c" -type f); \
+	for test_file in $$TEST_FILES; do \
+		test_name=$$(basename $$test_file .c); \
+		test_exe=$(BUILD_DIR)/$$test_name; \
+		echo "Building and running: $$test_name"; \
+		$(CC) $(CFLAGS) $(LDFLAGS) $$test_file $(LIB) -o $$test_exe 2>&1 | head -20; \
+		if [ $$? -eq 0 ]; then \
+			$$test_exe > /dev/null 2>&1; \
+		fi; \
+	done
+	@echo ""
+	@echo "Generating coverage report..."
+	@echo "----------------------------------------"
+	@# Generate .gcov files for all source files
+	@cd $(BUILD_DIR) && gcov card.gcda deck.gcda evaluator.gcda 2>&1 | grep -E "^(File|Lines executed|Creating)" || true
+	@mv $(BUILD_DIR)/*.c.gcov . 2>/dev/null || true
+	@# Check if lcov is available
+	@if command -v lcov > /dev/null 2>&1; then \
+		lcov --capture --directory . --directory $(BUILD_DIR) --output-file coverage.info --quiet 2>/dev/null; \
+		lcov --remove coverage.info '/usr/*' '*/tests/*' --output-file coverage.info --quiet 2>/dev/null; \
+		if command -v genhtml > /dev/null 2>&1; then \
+			genhtml coverage.info --output-directory coverage/ --quiet 2>/dev/null; \
+			echo "✓ HTML coverage report: coverage/index.html"; \
+		else \
+			echo "⚠ genhtml not found - HTML report not generated"; \
+			echo "  Install with: sudo apt-get install lcov"; \
+		fi; \
+	else \
+		echo "⚠ lcov not found - only .gcov files generated"; \
+		echo "  Install with: sudo apt-get install lcov"; \
+	fi
+	@echo ""
+	@echo "Coverage files generated:"
+	@ls -1 *.gcov 2>/dev/null || echo "  (no .gcov files found)"
+	@echo ""
+	@echo "=============================================="
+	@echo "Coverage generation complete!"
+	@echo ""
+	@echo "View coverage:"
+	@if [ -f coverage/index.html ]; then \
+		echo "  firefox coverage/index.html"; \
+	else \
+		echo "  cat *.gcov | grep -A5 'File.*\.c'"; \
+	fi
 
 # Valgrind target - memory leak verification
 .PHONY: valgrind
@@ -223,6 +280,7 @@ help:
 	@echo "  debug          - Build with debug symbols (-g -O0 -DDEBUG)"
 	@echo "  release        - Build optimized release (-O3 -DNDEBUG -march=native)"
 	@echo "  test           - Build and run tests"
+	@echo "  coverage       - Generate code coverage reports (gcov + lcov)"
 	@echo "  valgrind       - Run Valgrind memory leak verification on all tests"
 	@echo "  fuzz           - Build and run fuzzing tests (standalone mode)"
 	@echo "  fuzz-standalone- Build fuzzing harnesses with gcc (no libFuzzer)"
