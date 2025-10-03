@@ -214,6 +214,20 @@ int detect_full_house(const Card* cards, size_t len,
                       size_t* out_num_tiebreakers);
 
 /**
+ * @brief Detect three of a kind (no pair)
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param counts Optional pre-computed rank counts (can be NULL)
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if three of a kind, 0 otherwise
+ */
+int detect_three_of_a_kind(const Card* cards, size_t len,
+                            const int* counts,
+                            Rank* out_tiebreakers,
+                            size_t* out_num_tiebreakers);
+
+/**
  * @brief Detect straight flush
  * @param cards Array of exactly 5 cards
  * @param len Must be 5
