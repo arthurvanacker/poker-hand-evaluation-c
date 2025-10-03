@@ -126,6 +126,96 @@ void rank_counts(const Card* cards, size_t len, int* counts) {
     }
 }
 
+/**
+ * @brief Detect straight flush
+ *
+ * Detects if the hand is a straight flush (5 sequential suited cards).
+ * Combines is_flush() and is_straight() checks. Returns the high card
+ * for tiebreakers (RANK_FIVE for wheel straight flush).
+ *
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param out_high_card Pointer to receive high card rank (can be NULL)
+ * @return 1 if straight flush, 0 otherwise
+ */
+int detect_straight_flush(const Card* cards, size_t len, Rank* out_high_card) {
+    /* Validate input length */
+    if (len != 5) {
+        return 0;
+    }
+
+    /* Check if all cards are the same suit (flush) */
+    if (!is_flush(cards, len)) {
+        return 0;
+    }
+
+    /* Check if cards form a straight */
+    if (!is_straight(cards, len, out_high_card)) {
+        return 0;
+    }
+
+    /* Both flush and straight confirmed - it's a straight flush */
+    return 1;
+}
+
+/**
+ * @brief Detect royal flush
+ *
+ * Detects if the hand is a royal flush (10-J-Q-K-A all same suit).
+ * Uses is_flush() to verify all cards have the same suit, then checks
+ * for the exact ranks TEN, JACK, QUEEN, KING, ACE.
+ *
+ * Royal flush is the strongest poker hand and requires no tiebreakers.
+ *
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @return 1 if royal flush, 0 otherwise
+ */
+int detect_royal_flush(const Card* cards, size_t len) {
+    /* Validate input length */
+    if (len != 5) {
+        return 0;
+    }
+
+    /* Check if all cards are the same suit (flush) */
+    if (!is_flush(cards, len)) {
+        return 0;
+    }
+
+    /* Track which royal ranks we've found */
+    int has_ten = 0;
+    int has_jack = 0;
+    int has_queen = 0;
+    int has_king = 0;
+    int has_ace = 0;
+
+    /* Check each card for royal ranks */
+    for (size_t i = 0; i < len; i++) {
+        Rank rank = (Rank)cards[i].rank;
+        if (rank == RANK_TEN) {
+            has_ten = 1;
+        } else if (rank == RANK_JACK) {
+            has_jack = 1;
+        } else if (rank == RANK_QUEEN) {
+            has_queen = 1;
+        } else if (rank == RANK_KING) {
+            has_king = 1;
+        } else if (rank == RANK_ACE) {
+            has_ace = 1;
+        } else {
+            /* Non-royal rank found - cannot be royal flush */
+            return 0;
+        }
+    }
+
+    /* Verify all royal ranks are present */
+    if (has_ten && has_jack && has_queen && has_king && has_ace) {
+        return 1;
+    }
+
+    return 0;
+}
+
 int evaluate_hand(void) {
     /* Placeholder for hand evaluation */
     return 0;
