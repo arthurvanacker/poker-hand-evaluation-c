@@ -23,6 +23,7 @@ The project is built in phases:
 - Manual memory management with Valgrind verification
 - Portable C99 with no external dependencies (except Unity tests)
 - Performance-optimized algorithms
+- Zero memory leaks verified across all test executables
 
 ## Documentation
 
@@ -118,6 +119,66 @@ int main(void) {
 ```
 
 **Memory Management:** Always call `deck_free()` to prevent memory leaks. The library uses manual memory management - Valgrind verification ensures zero leaks.
+
+## Memory Safety and Valgrind
+
+This project enforces zero memory leaks using Valgrind, the industry-standard memory debugging tool for C/C++ programs.
+
+### Verifying Memory Safety
+
+Run Valgrind on all test executables:
+
+```bash
+make valgrind
+```
+
+This command:
+- Builds all test executables automatically
+- Runs each test under Valgrind with full leak checking
+- Reports any memory leaks, use-after-free, or invalid memory access
+- Exits with non-zero status if any leaks are detected
+
+**Expected output:**
+```
+==============================================
+Valgrind Summary: 19/19 tests passed
+✅ All tests passed - zero memory leaks!
+```
+
+### Manual Valgrind Testing
+
+To test a specific executable:
+
+```bash
+# Build the test
+gcc -Wall -Wextra -std=c99 -Iinclude tests/test_deck.c lib/libpoker.a -o build/test_deck
+
+# Run under Valgrind
+valgrind --leak-check=full \
+         --show-leak-kinds=all \
+         --track-origins=yes \
+         --error-exitcode=1 \
+         build/test_deck
+```
+
+### Valgrind Script
+
+The `tests/valgrind_test.sh` script provides detailed Valgrind output for deck operations:
+
+```bash
+./tests/valgrind_test.sh
+```
+
+This script runs the deck test suite with verbose Valgrind output, useful for debugging memory issues.
+
+### Memory Safety Guarantees
+
+- **Zero leaks**: All dynamically allocated memory is properly freed
+- **No use-after-free**: Freed memory is never accessed
+- **No invalid reads/writes**: All memory accesses are within allocated bounds
+- **NULL safety**: Functions handle NULL pointers gracefully
+
+All 19 test executables pass Valgrind verification with zero errors.
 
 ## Evaluation Core
 

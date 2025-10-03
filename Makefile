@@ -81,6 +81,58 @@ clean:
 	rm -rf $(LIB)
 	@echo "Cleaned build artifacts"
 
+# Valgrind target - memory leak verification
+.PHONY: valgrind
+valgrind: all
+	@echo "Running Valgrind memory leak verification..."
+	@echo "=============================================="
+	@echo ""
+	@# List of all test files
+	@TEST_FILES=$$(find $(TEST_DIR) -maxdepth 1 -name "test_*.c" -type f); \
+	TOTAL=0; \
+	PASSED=0; \
+	FAILED=0; \
+	for test_file in $$TEST_FILES; do \
+		test_name=$$(basename $$test_file .c); \
+		test_exe=$(BUILD_DIR)/$$test_name; \
+		echo "Testing: $$test_name"; \
+		echo "----------------------------------------"; \
+		if [ ! -f $$test_exe ]; then \
+			echo "Building $$test_exe..."; \
+			$(CC) $(CFLAGS) $$test_file $(LIB) -o $$test_exe 2>&1 | head -20; \
+			if [ $$? -ne 0 ]; then \
+				echo "✗ Build failed for $$test_name"; \
+				echo ""; \
+				FAILED=$$((FAILED + 1)); \
+				continue; \
+			fi; \
+		fi; \
+		valgrind --leak-check=full \
+		         --show-leak-kinds=all \
+		         --track-origins=yes \
+		         --error-exitcode=1 \
+		         --quiet \
+		         $$test_exe > /dev/null 2>&1; \
+		if [ $$? -eq 0 ]; then \
+			echo "✓ $$test_name - No memory leaks"; \
+			PASSED=$$((PASSED + 1)); \
+		else \
+			echo "✗ $$test_name - Memory leaks detected"; \
+			echo "  Run manually: valgrind --leak-check=full $$test_exe"; \
+			FAILED=$$((FAILED + 1)); \
+		fi; \
+		TOTAL=$$((TOTAL + 1)); \
+		echo ""; \
+	done; \
+	echo "==============================================";\
+	echo "Valgrind Summary: $$PASSED/$$TOTAL tests passed"; \
+	if [ $$FAILED -gt 0 ]; then \
+		echo "❌ $$FAILED test(s) failed - memory leaks detected"; \
+		exit 1; \
+	else \
+		echo "✅ All tests passed - zero memory leaks!"; \
+	fi
+
 # Help target
 .PHONY: help
 help:
@@ -89,6 +141,7 @@ help:
 	@echo "Available targets:"
 	@echo "  all       - Build static library (default)"
 	@echo "  test      - Build and run tests"
+	@echo "  valgrind  - Run Valgrind memory leak verification on all tests"
 	@echo "  examples  - Build example programs"
 	@echo "  clean     - Remove build artifacts"
 	@echo "  install   - Install library and headers"
