@@ -10,6 +10,8 @@ jobs:
   build-gcc:
     name: Build with GCC
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -31,6 +33,8 @@ jobs:
   lint:
     name: Static Analysis (cppcheck)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -50,6 +54,8 @@ jobs:
   build-clang:
     name: Build with Clang
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -74,6 +80,8 @@ jobs:
     name: Run Test Suite
     runs-on: ubuntu-latest
     needs: build-gcc
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -97,6 +105,8 @@ jobs:
     name: Valgrind Memory Checks
     runs-on: ubuntu-latest
     needs: build-gcc
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -120,6 +130,9 @@ jobs:
     name: Code Coverage Report
     runs-on: ubuntu-latest
     needs: build-gcc
+    permissions:
+      contents: read
+      actions: write
 
     steps:
       - name: Checkout code
@@ -156,6 +169,8 @@ jobs:
     name: Fuzzing Tests
     runs-on: ubuntu-latest
     needs: build-gcc
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -190,6 +205,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-gcc, build-clang, lint, test, valgrind, coverage, fuzzing]
     if: always()
+    permissions:
+      contents: read
+      actions: read
 
     steps:
       - name: Check build status
