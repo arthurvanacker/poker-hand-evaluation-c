@@ -63,7 +63,7 @@ Deck* deck_new(void) {
  *       and must not be used. Caller should set deck = NULL to prevent
  *       use-after-free errors.
  */
-void deck_free(Deck* deck) {
+void deck_free(Deck* const deck) {
     if (deck == NULL) {
         return;
     }
@@ -95,7 +95,7 @@ void deck_free(Deck* deck) {
  *
  * @param deck Pointer to deck to shuffle (must be non-NULL)
  */
-void deck_shuffle(Deck* deck) {
+void deck_shuffle(Deck* const deck) {
     // Iterate backwards from last card to second card
     for (size_t i = deck->size - 1; i > 0; i--) {
         // Generate random index j where 0 <= j <= i
@@ -125,7 +125,7 @@ void deck_shuffle(Deck* deck) {
  * @param n Number of cards to deal
  * @return Actual number of cards dealt (may be less than n if deck has fewer cards)
  */
-size_t deck_deal(Deck* deck, Card* out_cards, size_t n) {
+size_t deck_deal(Deck* const deck, Card* const out_cards, const size_t n) {
     // Determine actual number of cards to deal
     size_t actual_deal = (n < deck->size) ? n : deck->size;
 

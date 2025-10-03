@@ -9,7 +9,7 @@ void card_init(void) {
     /* Placeholder for card initialization */
 }
 
-int card_to_string(Card card, char* buffer, size_t size) {
+int card_to_string(const Card card, char* const buffer, const size_t size) {
     // Check buffer size - need at least 3 bytes (2 chars + null terminator)
     if (size < 3) {
         return -1;
@@ -49,7 +49,7 @@ int card_to_string(Card card, char* buffer, size_t size) {
     return 0;
 }
 
-int parse_card(const char* str, Card* out_card) {
+int parse_card(const char* const str, Card* const out_card) {
     // Validate input pointers
     if (str == NULL || out_card == NULL) {
         return -1;
