@@ -124,6 +124,33 @@ int main(void) {
 
 **Memory Management:** Always call `deck_free()` to prevent memory leaks. The library uses manual memory management - Valgrind verification ensures zero leaks.
 
+## Build Requirements
+
+This project requires the following tools to be installed:
+
+### Core Build Tools (Required)
+- **gcc** - GNU C Compiler (C99 compatible)
+- **make** - GNU Make build system
+
+### Optional Tools (Recommended)
+- **valgrind** - Memory leak detection (`make valgrind`)
+- **lcov** - Code coverage HTML reports (`make coverage`)
+- **cppcheck** - Static analysis (`make lint`)
+- **clang** - Alternative compiler and fuzzing support (`make fuzz-libfuzzer`)
+
+### Installing Dependencies
+
+**Ubuntu/Debian:**
+```bash
+# Core tools (usually pre-installed)
+sudo apt-get install gcc make
+
+# Optional tools (recommended for development)
+sudo apt-get install valgrind lcov cppcheck clang
+```
+
+All optional tools are used by specific make targets and are not required for basic library compilation.
+
 ## Code Quality & Security
 
 This project follows strict quality standards enforced through automated testing, static analysis, and security hardening practices.
@@ -136,6 +163,38 @@ This project follows strict quality standards enforced through automated testing
 - **Security Hardening**: 2 critical vulnerabilities fixed (CWE-190, CWE-415)
 - **Type Safety**: Const-correctness enforced on 23 function declarations
 - **Fuzzing Coverage**: 4 NULL pointer bugs discovered in <10 seconds
+
+### Static Analysis
+
+The project uses **cppcheck** for automated static analysis to catch bugs, undefined behavior, and style issues before they reach production.
+
+**Running static analysis:**
+```bash
+make lint
+```
+
+This command runs cppcheck with comprehensive checks including:
+- **Error detection**: Null pointer dereferences, buffer overflows, memory leaks
+- **Warning detection**: Unused variables, unreachable code, style issues
+- **Performance issues**: Inefficient algorithms, unnecessary operations
+- **Portability issues**: Platform-specific code, non-standard C
+
+**Configuration:**
+- Checks all source files in `src/` directory
+- Uses include path `-I include/` for header resolution
+- Enables all checks with `--enable=all`
+- Suppresses system include warnings with `--suppress=missingIncludeSystem`
+- Returns non-zero exit code on any issues found (`--error-exitcode=1`)
+
+**Example output:**
+```
+Running static analysis...
+Checking src/card.c...
+Checking src/deck.c...
+Checking src/evaluator.c...
+```
+
+If issues are found, cppcheck will report them with file location, line number, and suggested fixes.
 
 ### Const-Correctness
 

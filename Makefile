@@ -270,6 +270,14 @@ fuzz: fuzz-standalone
 	@echo "=============================================="
 	@echo "✅ All fuzzing tests completed successfully!"
 
+# Lint target - static analysis with cppcheck
+.PHONY: lint
+lint:
+	@echo "Running static analysis..."
+	cppcheck --enable=all --error-exitcode=1 \
+	         --suppress=missingIncludeSystem \
+	         -I include/ src/
+
 # Help target
 .PHONY: help
 help:
@@ -282,6 +290,7 @@ help:
 	@echo "  test           - Build and run tests"
 	@echo "  coverage       - Generate code coverage reports (gcov + lcov)"
 	@echo "  valgrind       - Run Valgrind memory leak verification on all tests"
+	@echo "  lint           - Run cppcheck static analysis on src/ and include/"
 	@echo "  fuzz           - Build and run fuzzing tests (standalone mode)"
 	@echo "  fuzz-standalone- Build fuzzing harnesses with gcc (no libFuzzer)"
 	@echo "  fuzz-libfuzzer - Build fuzzing harnesses with clang + libFuzzer"
