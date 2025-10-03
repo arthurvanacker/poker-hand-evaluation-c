@@ -5,9 +5,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Static helper: Compare ranks in descending order for qsort */
+/* Static helper: Compare ranks in descending order for qsort
+ * Uses conditional logic instead of subtraction to avoid integer overflow
+ * Safety: Subtraction-based comparators can overflow when (b - a) > INT_MAX
+ */
 static int rank_compare_desc(const void* a, const void* b) {
-    return (*(Rank*)b) - (*(Rank*)a);
+    Rank rank_a = *(Rank*)a;
+    Rank rank_b = *(Rank*)b;
+
+    /* Descending order: larger ranks come first */
+    if (rank_b > rank_a) {
+        return 1;   /* b is greater, so b comes first */
+    } else if (rank_b < rank_a) {
+        return -1;  /* a is greater, so a comes first */
+    } else {
+        return 0;   /* Equal ranks */
+    }
 }
 
 /**

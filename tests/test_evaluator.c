@@ -140,6 +140,106 @@ void test_rank_counts_invalid_rank_bounds(void) {
     printf("  ✓ Invalid rank bounds handled safely\n");
 }
 
+/* ========================================
+ * Test Suite: rank_compare_desc Safety
+ * Tests that rank comparison is overflow-safe
+ * ======================================== */
+
+void test_rank_compare_desc_edge_cases(void) {
+    printf("Testing rank_compare_desc with edge case ranks...\n");
+
+    /* Create hand with edge case ranks (ACE=14, TWO=2) that would overflow with subtraction
+     * If using subtraction: (14) - (2) = 12 (OK)
+     * But if using: (2) - (14) = -12 (OK for small values)
+     * Edge case: Very large rank differences could theoretically overflow INT_MIN/MAX
+     *
+     * This test verifies correct sorting behavior regardless of implementation
+     */
+    Card cards[5] = {
+        {RANK_TWO, SUIT_HEARTS},      /* 2 */
+        {RANK_ACE, SUIT_DIAMONDS},    /* 14 */
+        {RANK_FIVE, SUIT_CLUBS},      /* 5 */
+        {RANK_KING, SUIT_SPADES},     /* 13 */
+        {RANK_SEVEN, SUIT_HEARTS}     /* 7 */
+    };
+
+    /* Use detect_high_card to trigger rank_compare_desc sorting */
+    Rank tiebreakers[5];
+    size_t num_tiebreakers;
+    int result = detect_high_card(cards, 5, tiebreakers, &num_tiebreakers);
+
+    /* Verify high card detection succeeded */
+    assert(result == 1);
+    assert(num_tiebreakers == 5);
+
+    /* Verify ranks are sorted in descending order: ACE > KING > SEVEN > FIVE > TWO */
+    assert(tiebreakers[0] == RANK_ACE);    /* 14 */
+    assert(tiebreakers[1] == RANK_KING);   /* 13 */
+    assert(tiebreakers[2] == RANK_SEVEN);  /* 7 */
+    assert(tiebreakers[3] == RANK_FIVE);   /* 5 */
+    assert(tiebreakers[4] == RANK_TWO);    /* 2 */
+
+    printf("  ✓ rank_compare_desc handles edge case ranks correctly\n");
+}
+
+void test_rank_compare_desc_all_same(void) {
+    printf("Testing rank_compare_desc with identical ranks...\n");
+
+    /* All same rank - tests equal comparison */
+    Card cards[5] = {
+        {RANK_QUEEN, SUIT_HEARTS},
+        {RANK_QUEEN, SUIT_DIAMONDS},
+        {RANK_QUEEN, SUIT_CLUBS},
+        {RANK_QUEEN, SUIT_SPADES},
+        {RANK_KING, SUIT_HEARTS}
+    };
+
+    Rank tiebreakers[5];
+    size_t num_tiebreakers;
+    int result = detect_high_card(cards, 5, tiebreakers, &num_tiebreakers);
+
+    assert(result == 1);
+    assert(num_tiebreakers == 5);
+
+    /* First should be KING, then 4 QUEENs */
+    assert(tiebreakers[0] == RANK_KING);
+    assert(tiebreakers[1] == RANK_QUEEN);
+    assert(tiebreakers[2] == RANK_QUEEN);
+    assert(tiebreakers[3] == RANK_QUEEN);
+    assert(tiebreakers[4] == RANK_QUEEN);
+
+    printf("  ✓ rank_compare_desc handles identical ranks correctly\n");
+}
+
+void test_rank_compare_desc_consecutive_ranks(void) {
+    printf("Testing rank_compare_desc with consecutive ranks...\n");
+
+    /* Consecutive ranks in random order */
+    Card cards[5] = {
+        {RANK_SIX, SUIT_HEARTS},
+        {RANK_NINE, SUIT_DIAMONDS},
+        {RANK_SEVEN, SUIT_CLUBS},
+        {RANK_EIGHT, SUIT_SPADES},
+        {RANK_TEN, SUIT_HEARTS}
+    };
+
+    Rank tiebreakers[5];
+    size_t num_tiebreakers;
+    int result = detect_high_card(cards, 5, tiebreakers, &num_tiebreakers);
+
+    assert(result == 1);
+    assert(num_tiebreakers == 5);
+
+    /* Should be sorted: 10, 9, 8, 7, 6 */
+    assert(tiebreakers[0] == RANK_TEN);
+    assert(tiebreakers[1] == RANK_NINE);
+    assert(tiebreakers[2] == RANK_EIGHT);
+    assert(tiebreakers[3] == RANK_SEVEN);
+    assert(tiebreakers[4] == RANK_SIX);
+
+    printf("  ✓ rank_compare_desc handles consecutive ranks correctly\n");
+}
+
 int main(void) {
     printf("\n=== Evaluator Test Suite ===\n\n");
 
@@ -150,6 +250,11 @@ int main(void) {
     test_rank_counts_initialization();
     test_rank_counts_null_counts_pointer();
     test_rank_counts_invalid_rank_bounds();
+
+    /* Test rank_compare_desc safety */
+    test_rank_compare_desc_edge_cases();
+    test_rank_compare_desc_all_same();
+    test_rank_compare_desc_consecutive_ranks();
 
     printf("\n=== All tests passed! ===\n\n");
     return 0;
