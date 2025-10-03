@@ -495,12 +495,125 @@ The A-2-3-4-5 straight (wheel) is treated specially in poker. The ace acts as a 
 **Optional Pre-computed Counts:**
 Functions that analyze rank patterns (four of a kind, full house, three of a kind, two pair, one pair) accept an optional `counts` parameter. If `NULL`, the function computes counts internally using `rank_counts()`. If provided, the function uses the pre-computed counts for efficiency.
 
+## Fuzzing
+
+This project includes comprehensive fuzzing infrastructure to discover edge cases, crashes, and memory safety issues through automated testing. Fuzzing is a security hardening technique that tests the library with millions of random inputs to find bugs that traditional unit tests might miss.
+
+### Available Fuzzing Targets
+
+**1. Card Parsing Fuzzer** (`fuzz/fuzz_parse_card.c`)
+- Tests `parse_card()` with arbitrary input strings
+- Validates error handling for malformed input
+- Checks for buffer overflows and null pointer handling
+- Verifies round-trip conversion (parse → to_string → parse)
+
+**2. Hand Evaluation Fuzzer** (`fuzz/fuzz_evaluate_hand.c`)
+- Tests all 10 hand detection functions
+- Validates tiebreaker calculation correctness
+- Tests with random 5-card combinations
+- Verifies hand category invariants (e.g., royal flush implies flush)
+- Tests edge cases: NULL pointers, wrong array lengths, invalid cards
+
+### Building Fuzzers
+
+**Option 1: Standalone Mode (gcc, no dependencies)**
+```bash
+make fuzz-standalone
+```
+
+This builds fuzzing harnesses using gcc that can run immediately without additional setup. Best for quick testing and CI/CD pipelines.
+
+**Option 2: libFuzzer Mode (clang + AddressSanitizer, recommended for deep testing)**
+```bash
+# Install clang if not available
+sudo apt-get install clang
+
+# Build with libFuzzer
+make fuzz-libfuzzer
+```
+
+This builds fuzzing harnesses with clang's libFuzzer, AddressSanitizer, and UndefinedBehaviorSanitizer. Provides superior bug detection capabilities including:
+- Memory safety violations (use-after-free, buffer overflows)
+- Undefined behavior (integer overflow, null pointer dereference)
+- Coverage-guided fuzzing (explores code paths automatically)
+
+### Running Fuzzing Tests
+
+**Quick Test (standalone mode):**
+```bash
+make fuzz
+```
+
+Runs both fuzzers in standalone mode with pre-defined test cases and 10,000+ random inputs. Completes in seconds.
+
+**Extended Fuzzing Campaign (libFuzzer):**
+```bash
+# Fuzz card parsing for 1 hour
+./build/fuzz_parse_card_libfuzzer -max_total_time=3600
+
+# Fuzz hand evaluation for 24 hours
+./build/fuzz_evaluate_hand_libfuzzer -max_total_time=86400
+```
+
+LibFuzzer provides real-time statistics including:
+- Execution speed (execs/sec)
+- Code coverage (edges covered)
+- Corpus size (interesting test cases found)
+- Crashes detected
+
+### Interpreting Results
+
+**No crashes found:**
+```
+#1000000 DONE   cov: 245 ft: 312 corp: 89/1024b exec/s: 50000
+```
+This indicates successful fuzzing with no bugs detected.
+
+**Crash detected:**
+```
+==1234==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x...
+```
+LibFuzzer will save the crashing input to `crash-<hash>` for reproduction and debugging.
+
+### Fuzzing Best Practices
+
+1. **Start with standalone mode** to verify infrastructure works
+2. **Use libFuzzer for extended campaigns** (24+ hours recommended)
+3. **Run fuzzing after code changes** to catch regressions
+4. **Integrate with CI/CD** using `make fuzz` for continuous testing
+5. **Reproduce crashes** by running fuzzer with saved crash file:
+   ```bash
+   ./build/fuzz_parse_card_libfuzzer crash-abc123
+   ```
+
+### Coverage Goals
+
+- **Target**: >90% code coverage during fuzzing campaigns
+- **Current status**: Comprehensive coverage of all detection functions and helper functions
+- **Measuring coverage**: Use clang's `-fprofile-instr-generate -fcoverage-mapping` flags
+
+### Security Hardening
+
+Fuzzing helps prevent:
+- **Buffer overflows**: Detected when inputs exceed expected sizes
+- **Null pointer dereferences**: Caught by passing NULL to functions
+- **Integer overflows**: Found through extreme rank/suit values
+- **Logic errors**: Discovered through invariant violations
+- **Memory leaks**: Identified when combined with Valgrind
+
+### References
+
+- libFuzzer documentation: https://llvm.org/docs/LibFuzzer.html
+- AddressSanitizer: https://clang.llvm.org/docs/AddressSanitizer.html
+- Fuzzing best practices: https://google.github.io/fuzzing/
+
 ## Status
 
 ✅ **Phase 0 Complete** - Project structure, build system, and documentation framework established
 ✅ **Phase 1 Complete** - Foundation layer (Rank, Suit, Card, Deck) with full test coverage
 ✅ **Phase 2 Complete** - Evaluation core (HandCategory, Hand, helper functions) with comprehensive tests
 ✅ **Phase 3 Complete** - Detection layer (10 hand category detectors from Royal Flush to High Card)
+✅ **Security Hardening** - Fuzzing infrastructure with libFuzzer and AddressSanitizer support
 🚧 Under Development - This README will be updated as each phase completes.
 
 ## License
