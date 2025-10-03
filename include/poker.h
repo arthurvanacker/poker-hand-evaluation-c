@@ -242,6 +242,20 @@ int detect_two_pair(const Card* cards, size_t len,
                     size_t* out_num_tiebreakers);
 
 /**
+ * @brief Detect one pair
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param counts Optional pre-computed rank counts (can be NULL)
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if one pair, 0 otherwise
+ */
+int detect_one_pair(const Card* cards, size_t len,
+                    const int* counts,
+                    Rank* out_tiebreakers,
+                    size_t* out_num_tiebreakers);
+
+/**
  * @brief Detect straight flush
  * @param cards Array of exactly 5 cards
  * @param len Must be 5
