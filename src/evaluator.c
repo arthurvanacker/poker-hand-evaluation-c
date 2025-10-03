@@ -34,7 +34,7 @@ static int rank_compare_desc(const void* a, const void* b) {
  * @param out_high_card Optional pointer to receive high card rank
  * @return 1 if straight detected, 0 otherwise
  */
-int is_straight(const Card* cards, size_t len, Rank* out_high_card) {
+int is_straight(const Card* const cards, const size_t len, Rank* const out_high_card) {
     if (len != 5) {
         return 0;
     }
@@ -82,7 +82,7 @@ int is_straight(const Card* cards, size_t len, Rank* out_high_card) {
  * @param len Number of cards (must be 5 for valid poker hand)
  * @return 1 if all cards have same suit, 0 otherwise
  */
-int is_flush(const Card* cards, size_t len) {
+int is_flush(const Card* const cards, const size_t len) {
     /* Validate input parameters */
     if (cards == NULL || len != 5) {
         return 0;
@@ -115,7 +115,7 @@ int is_flush(const Card* cards, size_t len) {
  * @param len Number of cards in array
  * @param counts Output array[15] to receive counts (indexed by Rank, cannot be NULL)
  */
-void rank_counts(const Card* cards, size_t len, int* counts) {
+void rank_counts(const Card* const cards, const size_t len, int* const counts) {
     /* Validate counts pointer */
     if (counts == NULL) {
         return;
@@ -155,10 +155,10 @@ void rank_counts(const Card* cards, size_t len, int* counts) {
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
  * @return 1 if four of a kind, 0 otherwise
  */
-int detect_four_of_a_kind(const Card* cards, size_t len,
-                           const int* counts,
-                           Rank* out_tiebreakers,
-                           size_t* out_num_tiebreakers) {
+int detect_four_of_a_kind(const Card* const cards, const size_t len,
+                           const int* const counts,
+                           Rank* const out_tiebreakers,
+                           size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
     if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
@@ -218,7 +218,7 @@ int detect_four_of_a_kind(const Card* cards, size_t len,
  * @param out_high_card Pointer to receive high card rank (can be NULL)
  * @return 1 if straight flush, 0 otherwise
  */
-int detect_straight_flush(const Card* cards, size_t len, Rank* out_high_card) {
+int detect_straight_flush(const Card* const cards, const size_t len, Rank* const out_high_card) {
     /* Validate input length */
     if (len != 5) {
         return 0;
@@ -251,7 +251,7 @@ int detect_straight_flush(const Card* cards, size_t len, Rank* out_high_card) {
  * @param len Must be 5
  * @return 1 if royal flush, 0 otherwise
  */
-int detect_royal_flush(const Card* cards, size_t len) {
+int detect_royal_flush(const Card* const cards, const size_t len) {
     /* Validate input length */
     if (len != 5) {
         return 0;
@@ -312,10 +312,10 @@ int detect_royal_flush(const Card* cards, size_t len) {
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
  * @return 1 if full house, 0 otherwise
  */
-int detect_full_house(const Card* cards, size_t len,
-                      const int* counts,
-                      Rank* out_tiebreakers,
-                      size_t* out_num_tiebreakers) {
+int detect_full_house(const Card* const cards, const size_t len,
+                      const int* const counts,
+                      Rank* const out_tiebreakers,
+                      size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
     if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
@@ -385,10 +385,10 @@ int detect_full_house(const Card* cards, size_t len,
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
  * @return 1 if three of a kind, 0 otherwise
  */
-int detect_three_of_a_kind(const Card* cards, size_t len,
-                            const int* counts,
-                            Rank* out_tiebreakers,
-                            size_t* out_num_tiebreakers) {
+int detect_three_of_a_kind(const Card* const cards, const size_t len,
+                            const int* const counts,
+                            Rank* const out_tiebreakers,
+                            size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
     if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
@@ -479,10 +479,10 @@ int detect_three_of_a_kind(const Card* cards, size_t len,
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
  * @return 1 if two pair, 0 otherwise
  */
-int detect_two_pair(const Card* cards, size_t len,
-                    const int* counts,
-                    Rank* out_tiebreakers,
-                    size_t* out_num_tiebreakers) {
+int detect_two_pair(const Card* const cards, const size_t len,
+                    const int* const counts,
+                    Rank* const out_tiebreakers,
+                    size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
     if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
@@ -566,10 +566,10 @@ int detect_two_pair(const Card* cards, size_t len,
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
  * @return 1 if one pair, 0 otherwise
  */
-int detect_one_pair(const Card* cards, size_t len,
-                    const int* counts,
-                    Rank* out_tiebreakers,
-                    size_t* out_num_tiebreakers) {
+int detect_one_pair(const Card* const cards, const size_t len,
+                    const int* const counts,
+                    Rank* const out_tiebreakers,
+                    size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
     if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
@@ -658,9 +658,9 @@ int evaluate_hand(void) {
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
  * @return 1 if flush, 0 otherwise
  */
-int detect_flush(const Card* cards, size_t len,
-                 Rank* out_tiebreakers,
-                 size_t* out_num_tiebreakers) {
+int detect_flush(const Card* const cards, const size_t len,
+                 Rank* const out_tiebreakers,
+                 size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
     if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
@@ -709,9 +709,9 @@ int detect_flush(const Card* cards, size_t len,
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
  * @return 1 if straight (non-flush), 0 otherwise
  */
-int detect_straight(const Card* cards, size_t len,
-                    Rank* out_tiebreakers,
-                    size_t* out_num_tiebreakers) {
+int detect_straight(const Card* const cards, const size_t len,
+                    Rank* const out_tiebreakers,
+                    size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
     if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
@@ -748,9 +748,9 @@ int detect_straight(const Card* cards, size_t len,
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
  * @return 1 if valid 5-card input, 0 otherwise
  */
-int detect_high_card(const Card* cards, size_t len,
-                     Rank* out_tiebreakers,
-                     size_t* out_num_tiebreakers) {
+int detect_high_card(const Card* const cards, const size_t len,
+                     Rank* const out_tiebreakers,
+                     size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
     if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
