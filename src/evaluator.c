@@ -630,3 +630,44 @@ int detect_straight(const Card* cards, size_t len,
 
     return 1;
 }
+
+/**
+ * @brief Detect high card (always succeeds for valid input)
+ *
+ * Detects high card, which is the fallback when no other hand category matches.
+ * Returns all 5 card ranks in descending order as tiebreakers. This function
+ * always succeeds for valid 5-card input, making it the default/weakest hand.
+ *
+ * @param cards Array of exactly 5 cards
+ * @param len Must be 5
+ * @param out_tiebreakers Output array for tiebreaker ranks
+ * @param out_num_tiebreakers Pointer to receive count of tiebreakers
+ * @return 1 if valid 5-card input, 0 otherwise
+ */
+int detect_high_card(const Card* cards, size_t len,
+                     Rank* out_tiebreakers,
+                     size_t* out_num_tiebreakers) {
+    /* Validate input parameters */
+    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+        return 0;
+    }
+
+    /* Extract ranks into array */
+    Rank ranks[5];
+    for (size_t i = 0; i < 5; i++) {
+        ranks[i] = (Rank)cards[i].rank;
+    }
+
+    /* Sort ranks in descending order */
+    qsort(ranks, 5, sizeof(Rank), rank_compare_desc);
+
+    /* Write all 5 ranks to tiebreakers */
+    for (size_t i = 0; i < 5; i++) {
+        out_tiebreakers[i] = ranks[i];
+    }
+
+    /* Set number of tiebreakers to 5 */
+    *out_num_tiebreakers = 5;
+
+    return 1;
+}
