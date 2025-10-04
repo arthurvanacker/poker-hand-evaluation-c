@@ -10,6 +10,22 @@
 #include <stdint.h>
 
 /*
+ * Error codes - Following errno conventions
+ *
+ * The poker library uses a global error indicator (poker_errno) similar
+ * to the C standard library's errno. Functions that can fail will return
+ * an error indicator (e.g., -1, NULL) and set poker_errno to indicate
+ * the specific error type.
+ */
+extern int poker_errno;
+
+#define POKER_EOK       0  /* No error */
+#define POKER_EINVAL    1  /* Invalid argument */
+#define POKER_ENOMEM    2  /* Out of memory */
+#define POKER_ENOTFOUND 3  /* Pattern not found */
+#define POKER_ERANGE    4  /* Out of range */
+
+/*
  * Rank enumeration
  *
  * Represents card ranks from 2 (deuce) to 14 (ace).

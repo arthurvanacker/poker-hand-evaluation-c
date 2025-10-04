@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Global error indicator - initialized to POKER_EOK (0) */
+int poker_errno = 0;
+
 /* Static helper: Compare ranks in descending order for qsort
  * Uses conditional logic instead of subtraction to avoid integer overflow
  * Safety: Subtraction-based comparators can overflow when (b - a) > INT_MAX
