@@ -603,6 +603,40 @@ The A-2-3-4-5 straight (wheel) is treated specially in poker. The ace acts as a 
 **Optional Pre-computed Counts:**
 Functions that analyze rank patterns (four of a kind, full house, three of a kind, two pair, one pair) accept an optional `counts` parameter. If `NULL`, the function computes counts internally using `rank_counts()`. If provided, the function uses the pre-computed counts for efficiency.
 
+### Project Structure (Refactored)
+
+The evaluation logic has been refactored into a modular structure for improved maintainability and navigation:
+
+```
+src/
+├── card.c              # Card string conversion and parsing
+├── deck.c              # Deck management (new, shuffle, deal, free)
+├── evaluator.c         # Main evaluation orchestration (poker_errno, evaluate_hand)
+├── helpers.c           # Shared helper functions (is_flush, is_straight, rank_counts, rank_compare_desc)
+└── detectors/          # Individual detector files for each hand category
+    ├── royal_flush.c
+    ├── straight_flush.c
+    ├── four_of_a_kind.c
+    ├── full_house.c
+    ├── flush.c
+    ├── straight.c
+    ├── three_of_a_kind.c
+    ├── two_pair.c
+    ├── one_pair.c
+    └── high_card.c
+```
+
+**Benefits of this structure:**
+- **Modularity**: Each detector is in its own file, making it easy to locate and modify specific hand detection logic
+- **Separation of Concerns**: Helpers are separated from detectors, which are separated from orchestration
+- **Maintainability**: Smaller files (50-100 lines each) are easier to understand and test
+- **Build System**: Makefile automatically compiles all detector files from `src/detectors/` directory
+
+**Compile Process:**
+- Helper functions are compiled into `build/helpers.o`
+- Detector files are compiled into `build/detectors/*.o`
+- All object files are linked into `lib/libpoker.a` static library
+
 ## Fuzzing
 
 This project includes comprehensive fuzzing infrastructure to discover edge cases, crashes, and memory safety issues through automated testing. Fuzzing is a security hardening technique that tests the library with millions of random inputs to find bugs that traditional unit tests might miss.

@@ -18,10 +18,28 @@ EXAMPLES_DIR = examples
 FUZZ_DIR = fuzz
 
 # Source files
-SRC = src/card.c src/deck.c src/evaluator.c
+SRC = src/card.c src/deck.c src/evaluator.c src/helpers.c
+
+# Detector source files
+DETECTOR_SRC = src/detectors/royal_flush.c \
+               src/detectors/straight_flush.c \
+               src/detectors/four_of_a_kind.c \
+               src/detectors/full_house.c \
+               src/detectors/flush.c \
+               src/detectors/straight.c \
+               src/detectors/three_of_a_kind.c \
+               src/detectors/two_pair.c \
+               src/detectors/one_pair.c \
+               src/detectors/high_card.c
 
 # Object files (convert src/*.c to build/*.o)
 OBJ = $(SRC:src/%.c=build/%.o)
+
+# Detector object files
+DETECTOR_OBJ = $(DETECTOR_SRC:src/detectors/%.c=build/detectors/%.o)
+
+# All object files
+ALL_OBJ = $(OBJ) $(DETECTOR_OBJ)
 
 # Library output
 LIB = lib/libpoker.a
@@ -41,18 +59,20 @@ release: CFLAGS += -O3 -DNDEBUG -march=native
 release: all
 
 # Build static library
-$(LIB): $(OBJ) | $(LIB_DIR)
+$(LIB): $(ALL_OBJ) | $(LIB_DIR)
 	$(AR) $(ARFLAGS) $@ $^
 	@echo "Built library: $(LIB)"
 
 # Build object files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 	@echo "Compiled: $<"
 
 # Create directories if they don't exist
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
+	mkdir -p $(BUILD_DIR)/detectors
 
 $(LIB_DIR):
 	mkdir -p $(LIB_DIR)
@@ -89,9 +109,11 @@ install: all
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)/*.o
+	rm -rf $(BUILD_DIR)/detectors/*.o
 	rm -rf $(LIB)
 	rm -rf *.gcda *.gcno *.gcov
 	rm -rf $(BUILD_DIR)/*.gcda $(BUILD_DIR)/*.gcno
+	rm -rf $(BUILD_DIR)/detectors/*.gcda $(BUILD_DIR)/detectors/*.gcno
 	rm -rf coverage.info coverage/
 	@echo "Cleaned build artifacts"
 
@@ -118,8 +140,10 @@ coverage: clean all
 	@echo "Generating coverage report..."
 	@echo "----------------------------------------"
 	@# Generate .gcov files for all source files
-	@cd $(BUILD_DIR) && gcov card.gcda deck.gcda evaluator.gcda 2>&1 | grep -E "^(File|Lines executed|Creating)" || true
+	@cd $(BUILD_DIR) && gcov card.gcda deck.gcda evaluator.gcda helpers.gcda 2>&1 | grep -E "^(File|Lines executed|Creating)" || true
+	@cd $(BUILD_DIR)/detectors && gcov *.gcda 2>&1 | grep -E "^(File|Lines executed|Creating)" || true
 	@mv $(BUILD_DIR)/*.c.gcov . 2>/dev/null || true
+	@mv $(BUILD_DIR)/detectors/*.c.gcov . 2>/dev/null || true
 	@# Check if lcov is available
 	@if command -v lcov > /dev/null 2>&1; then \
 		lcov --capture --directory . --directory $(BUILD_DIR) --output-file coverage.info --quiet 2>/dev/null; \
