@@ -8,6 +8,45 @@
 #include <string.h>
 
 /**
+ * @brief Generate unbiased random number in range [0, max) using rejection sampling
+ *
+ * Eliminates modulo bias that occurs with naive `rand() % max` approach.
+ * When RAND_MAX+1 is not evenly divisible by max, some values appear more
+ * frequently than others, introducing statistical bias in the shuffle.
+ *
+ * Example of modulo bias:
+ * - RAND_MAX = 32767, max = 52
+ * - 32767 % 52 = 47
+ * - Values 0-47 appear ceil(32768/52) = 631 times
+ * - Values 48-51 appear floor(32768/52) = 630 times
+ * - Bias: ~0.16% difference
+ *
+ * Rejection sampling algorithm:
+ * 1. Calculate limit = RAND_MAX - (RAND_MAX % max)
+ * 2. Generate r = rand()
+ * 3. If r >= limit, reject and retry (ensures uniform subset)
+ * 4. Return r % max (now unbiased)
+ *
+ * The rejection probability is (RAND_MAX % max) / (RAND_MAX + 1), which is
+ * very low for typical values (e.g., 47/32768 = 0.14% for 52-card deck).
+ *
+ * @param max Upper bound (exclusive) - returns value in [0, max)
+ * @return Unbiased random number in range [0, max)
+ */
+size_t random_range(const size_t max) {
+    // Calculate the largest multiple of max that fits in [0, RAND_MAX]
+    // This is the rejection threshold - values >= limit are rejected
+    size_t limit = RAND_MAX - (RAND_MAX % max);
+
+    size_t r;
+    do {
+        r = (size_t)rand();
+    } while (r >= limit);  // Rejection sampling: retry if r is in biased range
+
+    return r % max;  // Now unbiased since r is uniformly distributed in [0, limit)
+}
+
+/**
  * @brief Create new deck with DECK_SIZE cards
  *
  * Allocates a new deck structure and populates it with all DECK_SIZE standard
@@ -98,8 +137,8 @@ void deck_free(Deck* const deck) {
 void deck_shuffle(Deck* const deck) {
     // Iterate backwards from last card to second card
     for (size_t i = deck->size - 1; i > 0; i--) {
-        // Generate random index j where 0 <= j <= i
-        size_t j = rand() % (i + 1);
+        // Generate random index j where 0 <= j <= i using unbiased random_range()
+        size_t j = random_range(i + 1);
 
         // Swap cards[i] with cards[j]
         Card temp = deck->cards[i];
