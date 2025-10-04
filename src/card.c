@@ -5,10 +5,6 @@
 #include <ctype.h>
 #include "../include/poker.h"
 
-void card_init(void) {
-    /* Placeholder for card initialization */
-}
-
 int card_to_string(const Card card, char* const buffer, const size_t size) {
     // Check buffer size - need at least 3 bytes (2 chars + null terminator)
     if (size < 3) {
