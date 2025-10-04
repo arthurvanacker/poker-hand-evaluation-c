@@ -29,27 +29,27 @@ static int rank_compare_desc(const void* a, const void* b) {
 /**
  * @brief Check if cards form a straight
  *
- * Detects straights in a 5-card hand, including special handling for
+ * Detects straights in a HAND_SIZE-card hand, including special handling for
  * wheel straight (A-2-3-4-5). Sorts ranks internally before checking.
  *
  * @param cards Array of cards to check
- * @param len Number of cards (must be 5)
+ * @param len Number of cards (must be HAND_SIZE)
  * @param out_high_card Optional pointer to receive high card rank
  * @return 1 if straight detected, 0 otherwise
  */
 int is_straight(const Card* const cards, const size_t len, Rank* const out_high_card) {
-    if (len != 5) {
+    if (len != HAND_SIZE) {
         return 0;
     }
 
     /* Extract ranks into array */
-    Rank ranks[5];
-    for (size_t i = 0; i < 5; i++) {
+    Rank ranks[HAND_SIZE];
+    for (size_t i = 0; i < HAND_SIZE; i++) {
         ranks[i] = (Rank)cards[i].rank;
     }
 
     /* Sort ranks in descending order */
-    qsort(ranks, 5, sizeof(Rank), rank_compare_desc);
+    qsort(ranks, HAND_SIZE, sizeof(Rank), rank_compare_desc);
 
     /* Check for wheel straight: A-5-4-3-2 (sorted descending) */
     if (ranks[0] == RANK_ACE && ranks[1] == RANK_FIVE &&
@@ -62,7 +62,7 @@ int is_straight(const Card* const cards, const size_t len, Rank* const out_high_
     }
 
     /* Check for regular straight: each rank = previous - 1 */
-    for (size_t i = 1; i < 5; i++) {
+    for (size_t i = 1; i < HAND_SIZE; i++) {
         if (ranks[i] != ranks[i-1] - 1) {
             return 0;
         }
@@ -82,12 +82,12 @@ int is_straight(const Card* const cards, const size_t len, Rank* const out_high_
  * for flush detection in poker hand evaluation.
  *
  * @param cards Array of cards to check
- * @param len Number of cards (must be 5 for valid poker hand)
+ * @param len Number of cards (must be HAND_SIZE for valid poker hand)
  * @return 1 if all cards have same suit, 0 otherwise
  */
 int is_flush(const Card* const cards, const size_t len) {
     /* Validate input parameters */
-    if (cards == NULL || len != 5) {
+    if (cards == NULL || len != HAND_SIZE) {
         return 0;
     }
 
@@ -109,14 +109,14 @@ int is_flush(const Card* const cards, const size_t len) {
  *
  * Initializes counts array to zero, then iterates through cards and
  * increments the count for each card's rank. The counts array is indexed
- * by Rank values (2-14), so it must be at least 15 elements.
+ * by Rank values (2-14), so it must be at least RANK_ARRAY_SIZE elements.
  *
  * Validates all input parameters and performs bounds checking on rank values
  * to prevent buffer overruns and undefined behavior.
  *
  * @param cards Array of cards to count (can be NULL if len is 0)
  * @param len Number of cards in array
- * @param counts Output array[15] to receive counts (indexed by Rank, cannot be NULL)
+ * @param counts Output array[RANK_ARRAY_SIZE] to receive counts (indexed by Rank, cannot be NULL)
  */
 void rank_counts(const Card* const cards, const size_t len, int* const counts) {
     /* Validate counts pointer */
@@ -125,7 +125,7 @@ void rank_counts(const Card* const cards, const size_t len, int* const counts) {
     }
 
     /* Initialize all counts to zero */
-    memset(counts, 0, 15 * sizeof(int));
+    memset(counts, 0, RANK_ARRAY_SIZE * sizeof(int));
 
     /* Handle empty or NULL cards array */
     if (cards == NULL || len == 0) {
@@ -151,8 +151,8 @@ void rank_counts(const Card* const cards, const size_t len, int* const counts) {
  * The function validates all input parameters and handles the optional counts
  * parameter by computing counts internally if NULL is provided.
  *
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param counts Optional pre-computed rank counts (can be NULL)
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
@@ -163,12 +163,12 @@ int detect_four_of_a_kind(const Card* const cards, const size_t len,
                            Rank* const out_tiebreakers,
                            size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
-    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+    if (cards == NULL || len != HAND_SIZE || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
     }
 
     /* Use provided counts or compute locally */
-    int local_counts[15];
+    int local_counts[RANK_ARRAY_SIZE];
     const int* rank_count_array;
 
     if (counts == NULL) {
@@ -212,18 +212,18 @@ int detect_four_of_a_kind(const Card* const cards, const size_t len,
 /**
  * @brief Detect straight flush
  *
- * Detects if the hand is a straight flush (5 sequential suited cards).
+ * Detects if the hand is a straight flush (HAND_SIZE sequential suited cards).
  * Combines is_flush() and is_straight() checks. Returns the high card
  * for tiebreakers (RANK_FIVE for wheel straight flush).
  *
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param out_high_card Pointer to receive high card rank (can be NULL)
  * @return 1 if straight flush, 0 otherwise
  */
 int detect_straight_flush(const Card* const cards, const size_t len, Rank* const out_high_card) {
     /* Validate input length */
-    if (len != 5) {
+    if (len != HAND_SIZE) {
         return 0;
     }
 
@@ -250,13 +250,13 @@ int detect_straight_flush(const Card* const cards, const size_t len, Rank* const
  *
  * Royal flush is the strongest poker hand and requires no tiebreakers.
  *
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @return 1 if royal flush, 0 otherwise
  */
 int detect_royal_flush(const Card* const cards, const size_t len) {
     /* Validate input length */
-    if (len != 5) {
+    if (len != HAND_SIZE) {
         return 0;
     }
 
@@ -308,8 +308,8 @@ int detect_royal_flush(const Card* const cards, const size_t len) {
  * The function validates all input parameters and handles the optional counts
  * parameter by computing counts internally if NULL is provided.
  *
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param counts Optional pre-computed rank counts (can be NULL)
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
@@ -320,12 +320,12 @@ int detect_full_house(const Card* const cards, const size_t len,
                       Rank* const out_tiebreakers,
                       size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
-    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+    if (cards == NULL || len != HAND_SIZE || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
     }
 
     /* Use provided counts or compute locally */
-    int local_counts[15];
+    int local_counts[RANK_ARRAY_SIZE];
     const int* rank_count_array;
 
     if (counts == NULL) {
@@ -381,8 +381,8 @@ int detect_full_house(const Card* const cards, const size_t len,
  * The function validates all input parameters and handles the optional counts
  * parameter by computing counts internally if NULL is provided.
  *
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param counts Optional pre-computed rank counts (can be NULL)
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
@@ -393,12 +393,12 @@ int detect_three_of_a_kind(const Card* const cards, const size_t len,
                             Rank* const out_tiebreakers,
                             size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
-    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+    if (cards == NULL || len != HAND_SIZE || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
     }
 
     /* Use provided counts or compute locally */
-    int local_counts[15];
+    int local_counts[RANK_ARRAY_SIZE];
     const int* rank_count_array;
 
     if (counts == NULL) {
@@ -475,8 +475,8 @@ int detect_three_of_a_kind(const Card* const cards, const size_t len,
  * parameter by computing counts internally if NULL is provided. It excludes
  * full houses (trips with a pair) and quads.
  *
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param counts Optional pre-computed rank counts (can be NULL)
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
@@ -487,12 +487,12 @@ int detect_two_pair(const Card* const cards, const size_t len,
                     Rank* const out_tiebreakers,
                     size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
-    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+    if (cards == NULL || len != HAND_SIZE || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
     }
 
     /* Use provided counts or compute locally */
-    int local_counts[15];
+    int local_counts[RANK_ARRAY_SIZE];
     const int* rank_count_array;
 
     if (counts == NULL) {
@@ -562,8 +562,8 @@ int detect_two_pair(const Card* const cards, const size_t len,
  * parameter by computing counts internally if NULL is provided. It excludes
  * two pairs, trips, full houses, and quads.
  *
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param counts Optional pre-computed rank counts (can be NULL)
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
@@ -574,12 +574,12 @@ int detect_one_pair(const Card* const cards, const size_t len,
                     Rank* const out_tiebreakers,
                     size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
-    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+    if (cards == NULL || len != HAND_SIZE || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
     }
 
     /* Use provided counts or compute locally */
-    int local_counts[15];
+    int local_counts[RANK_ARRAY_SIZE];
     const int* rank_count_array;
 
     if (counts == NULL) {
@@ -650,13 +650,13 @@ int evaluate_hand(void) {
 /**
  * @brief Detect flush (non-straight)
  *
- * Detects if the hand is a flush (5 suited cards, non-sequential).
+ * Detects if the hand is a flush (HAND_SIZE suited cards, non-sequential).
  * Uses is_flush() to verify all cards have the same suit, then uses
- * is_straight() to exclude straight flushes. Returns all 5 ranks in
+ * is_straight() to exclude straight flushes. Returns all HAND_SIZE ranks in
  * descending order as tiebreakers.
  *
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
  * @return 1 if flush, 0 otherwise
@@ -665,7 +665,7 @@ int detect_flush(const Card* const cards, const size_t len,
                  Rank* const out_tiebreakers,
                  size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
-    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+    if (cards == NULL || len != HAND_SIZE || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
     }
 
@@ -680,21 +680,21 @@ int detect_flush(const Card* const cards, const size_t len,
     }
 
     /* Extract ranks into array */
-    Rank ranks[5];
-    for (size_t i = 0; i < 5; i++) {
+    Rank ranks[HAND_SIZE];
+    for (size_t i = 0; i < HAND_SIZE; i++) {
         ranks[i] = (Rank)cards[i].rank;
     }
 
     /* Sort ranks in descending order */
-    qsort(ranks, 5, sizeof(Rank), rank_compare_desc);
+    qsort(ranks, HAND_SIZE, sizeof(Rank), rank_compare_desc);
 
-    /* Write all 5 ranks to tiebreakers */
-    for (size_t i = 0; i < 5; i++) {
+    /* Write all HAND_SIZE ranks to tiebreakers */
+    for (size_t i = 0; i < HAND_SIZE; i++) {
         out_tiebreakers[i] = ranks[i];
     }
 
     /* Set number of tiebreakers to 5 */
-    *out_num_tiebreakers = 5;
+    *out_num_tiebreakers = HAND_SIZE;
 
     return 1;
 }
@@ -706,8 +706,8 @@ int detect_flush(const Card* const cards, const size_t len,
  * Uses is_flush() to reject flushes, then is_straight() to detect sequential ranks.
  * Returns the high card as a tiebreaker (RANK_FIVE for wheel straight).
  *
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
  * @return 1 if straight (non-flush), 0 otherwise
@@ -716,7 +716,7 @@ int detect_straight(const Card* const cards, const size_t len,
                     Rank* const out_tiebreakers,
                     size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
-    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+    if (cards == NULL || len != HAND_SIZE || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
     }
 
@@ -742,39 +742,39 @@ int detect_straight(const Card* const cards, const size_t len,
  * @brief Detect high card (always succeeds for valid input)
  *
  * Detects high card, which is the fallback when no other hand category matches.
- * Returns all 5 card ranks in descending order as tiebreakers. This function
- * always succeeds for valid 5-card input, making it the default/weakest hand.
+ * Returns all HAND_SIZE card ranks in descending order as tiebreakers. This function
+ * always succeeds for valid HAND_SIZE-card input, making it the default/weakest hand.
  *
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
- * @return 1 if valid 5-card input, 0 otherwise
+ * @return 1 if valid HAND_SIZE-card input, 0 otherwise
  */
 int detect_high_card(const Card* const cards, const size_t len,
                      Rank* const out_tiebreakers,
                      size_t* const out_num_tiebreakers) {
     /* Validate input parameters */
-    if (cards == NULL || len != 5 || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
+    if (cards == NULL || len != HAND_SIZE || out_tiebreakers == NULL || out_num_tiebreakers == NULL) {
         return 0;
     }
 
     /* Extract ranks into array */
-    Rank ranks[5];
-    for (size_t i = 0; i < 5; i++) {
+    Rank ranks[HAND_SIZE];
+    for (size_t i = 0; i < HAND_SIZE; i++) {
         ranks[i] = (Rank)cards[i].rank;
     }
 
     /* Sort ranks in descending order */
-    qsort(ranks, 5, sizeof(Rank), rank_compare_desc);
+    qsort(ranks, HAND_SIZE, sizeof(Rank), rank_compare_desc);
 
-    /* Write all 5 ranks to tiebreakers */
-    for (size_t i = 0; i < 5; i++) {
+    /* Write all HAND_SIZE ranks to tiebreakers */
+    for (size_t i = 0; i < HAND_SIZE; i++) {
         out_tiebreakers[i] = ranks[i];
     }
 
     /* Set number of tiebreakers to 5 */
-    *out_num_tiebreakers = 5;
+    *out_num_tiebreakers = HAND_SIZE;
 
     return 1;
 }
