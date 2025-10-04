@@ -726,6 +726,86 @@ Fuzzing helps prevent:
 - AddressSanitizer: https://clang.llvm.org/docs/AddressSanitizer.html
 - Fuzzing best practices: https://google.github.io/fuzzing/
 
+## Algorithm Complexity
+
+This section documents the time and space complexity of all major algorithms in the poker hand evaluation library. Understanding these complexities helps developers make informed decisions about performance optimization and scalability.
+
+### Complexity Table
+
+| Function | Time | Space | Notes |
+|----------|------|-------|-------|
+| **Foundation Layer** | | | |
+| `deck_new()` | O(n) | O(n) | n = 52 cards, nested loop initialization |
+| `deck_free()` | O(1) | O(1) | Simple deallocation with NULL poisoning |
+| `deck_shuffle()` | O(n) | O(1) | Fisher-Yates algorithm, in-place shuffling |
+| `deck_deal()` | O(n) | O(1) | memcpy + memmove for card removal |
+| `card_to_string()` | O(1) | O(1) | Direct character mapping via switch |
+| `parse_card()` | O(1) | O(1) | Fixed-length string parsing (2 chars) |
+| **Evaluation Core** | | | |
+| `is_flush()` | O(n) | O(1) | n = 5, single-pass suit comparison |
+| `is_straight()` | O(n log n) | O(n) | n = 5, uses qsort() for rank sorting |
+| `rank_counts()` | O(n) | O(1) | n = 5, array-based frequency counting |
+| **Detection Layer** | | | |
+| `detect_royal_flush()` | O(n) | O(1) | n = 5, flush check + rank verification |
+| `detect_straight_flush()` | O(n log n) | O(n) | n = 5, flush + straight (qsort dominates) |
+| `detect_four_of_a_kind()` | O(n) | O(1) | n = 13 ranks, linear scan of counts array |
+| `detect_full_house()` | O(n) | O(1) | n = 13 ranks, linear scan for trip + pair |
+| `detect_flush()` | O(n log n) | O(n) | n = 5, flush check + qsort for tiebreakers |
+| `detect_straight()` | O(n log n) | O(n) | n = 5, straight check (qsort dominates) |
+| `detect_three_of_a_kind()` | O(n) | O(1) | n = 13 ranks, linear scan + kicker sorting |
+| `detect_two_pair()` | O(n) | O(1) | n = 13 ranks, linear scan for 2 pairs |
+| `detect_one_pair()` | O(n log n) | O(n) | n = 5, uses qsort for kicker ordering |
+| `detect_high_card()` | O(n log n) | O(n) | n = 5, qsort for rank ordering |
+
+### Complexity Justifications
+
+**Fisher-Yates Shuffle (deck_shuffle):**
+- **Time: O(n)** - Single backwards iteration through n cards, each with one swap operation
+- **Space: O(1)** - In-place shuffling with only a temporary Card variable
+- Algorithm guarantees uniform distribution of all n! permutations
+
+**qsort-based Functions (is_straight, detect_flush, detect_high_card, etc.):**
+- **Time: O(n log n)** - Standard library qsort uses introsort (quicksort + heapsort hybrid)
+- **Space: O(n)** - Temporary array allocation for extracted ranks (n = 5 for hands)
+- For n = 5 cards, this is effectively constant time in practice
+
+**Array-based Counting (rank_counts):**
+- **Time: O(n)** - Single pass through cards array to increment counts
+- **Space: O(1)** - Fixed-size counts array of 15 integers (indexed by rank 0-14)
+- No dynamic allocation or hash tables needed
+
+**Single-pass Comparisons (is_flush, detect_royal_flush):**
+- **Time: O(n)** - Iterate through cards once to check property
+- **Space: O(1)** - Only primitive variables for tracking state
+- Optimal complexity for verification problems
+
+**Detection Functions with Counts:**
+- **Time: O(n)** - Linear scan through 13 possible ranks (RANK_TWO to RANK_ACE)
+- **Space: O(1)** - Use pre-computed or locally-allocated counts array
+- Kicker sorting is O(k log k) where k is small (typically 2-3 kickers)
+
+**Memory Operations (deck_deal):**
+- **Time: O(n)** - memcpy for n dealt cards + memmove for remaining cards
+- **Space: O(1)** - No additional allocation, operates on existing deck
+- Uses efficient bulk memory operations from <string.h>
+
+### Performance Characteristics
+
+**5-Card Hand Evaluation:**
+- Worst case: O(n log n) where n = 5 (effectively constant)
+- Best case: O(n) for simple checks like flush or royal flush
+- All detection functions complete in microseconds for 5-card hands
+
+**52-Card Deck Operations:**
+- Initialization: O(52) = constant time
+- Shuffling: O(52) = constant time with optimal distribution
+- Dealing: O(k) where k is number of cards dealt
+
+**Scalability:**
+- Current implementation optimized for standard 5-card poker hands
+- For 7-card evaluation (Texas Hold'em), complexity remains O(n log n) per combination
+- Memory footprint is minimal: all core functions use O(1) or O(n) space where n ≤ 52
+
 ## Code Coverage
 
 This project uses gcov and lcov to track test coverage and ensure comprehensive testing of all source code.
