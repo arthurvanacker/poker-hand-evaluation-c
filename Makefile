@@ -16,6 +16,7 @@ INCLUDE_DIR = include
 TEST_DIR = tests
 EXAMPLES_DIR = examples
 FUZZ_DIR = fuzz
+BENCHMARK_DIR = benchmark
 
 # Source files
 SRC = src/card.c src/deck.c src/evaluator.c src/helpers.c
@@ -107,6 +108,33 @@ examples: all
 	@echo "  $(EXAMPLES_DIR)/poker_game"
 	@echo "  $(EXAMPLES_DIR)/hand_detector"
 
+# Benchmark target - build and run performance benchmarks
+.PHONY: benchmark
+benchmark: all
+	@echo "Building benchmarks..."
+	@echo "=============================================="
+	@echo ""
+	@mkdir -p $(BUILD_DIR)
+	@echo "Compiling benchmark utilities..."
+	$(CC) $(CFLAGS) -c $(BENCHMARK_DIR)/benchmark_utils.c -o $(BUILD_DIR)/benchmark_utils.o
+	@echo "Compiling benchmark functions..."
+	$(CC) $(CFLAGS) -c $(BENCHMARK_DIR)/bench_deck_shuffle.c -o $(BUILD_DIR)/bench_deck_shuffle.o
+	$(CC) $(CFLAGS) -c $(BENCHMARK_DIR)/bench_helpers.c -o $(BUILD_DIR)/bench_helpers.o
+	$(CC) $(CFLAGS) -c $(BENCHMARK_DIR)/bench_detectors.c -o $(BUILD_DIR)/bench_detectors.o
+	@echo "Linking benchmark executable..."
+	$(CC) $(CFLAGS) $(BENCHMARK_DIR)/benchmark_main.c \
+		$(BUILD_DIR)/benchmark_utils.o \
+		$(BUILD_DIR)/bench_deck_shuffle.o \
+		$(BUILD_DIR)/bench_helpers.o \
+		$(BUILD_DIR)/bench_detectors.o \
+		$(LIB) -o $(BUILD_DIR)/benchmark
+	@echo "✓ Built: $(BUILD_DIR)/benchmark"
+	@echo ""
+	@echo "=============================================="
+	@echo "Running benchmarks..."
+	@echo ""
+	@$(BUILD_DIR)/benchmark
+
 # Install target - install library and headers
 .PHONY: install
 install: all
@@ -130,6 +158,7 @@ clean:
 	rm -rf $(BUILD_DIR)/detectors/*.gcda $(BUILD_DIR)/detectors/*.gcno
 	rm -rf coverage.info coverage/
 	rm -rf $(EXAMPLES_DIR)/poker_game $(EXAMPLES_DIR)/hand_detector
+	rm -rf $(BUILD_DIR)/benchmark
 	@echo "Cleaned build artifacts"
 
 # Coverage target - generate code coverage reports
@@ -335,6 +364,7 @@ help:
 	@echo "  fuzz-standalone- Build fuzzing harnesses with gcc (no libFuzzer)"
 	@echo "  fuzz-libfuzzer - Build fuzzing harnesses with clang + libFuzzer"
 	@echo "  examples       - Build example programs"
+	@echo "  benchmark      - Build and run performance benchmarks"
 	@echo "  clean          - Remove build artifacts"
 	@echo "  install        - Install library and headers"
 	@echo "  help           - Display this help message"
