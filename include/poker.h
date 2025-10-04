@@ -10,6 +10,36 @@
 #include <stdint.h>
 
 /*
+ * Library version
+ * Semantic versioning: MAJOR.MINOR.PATCH
+ * - MAJOR: Incompatible API changes
+ * - MINOR: Backwards-compatible functionality additions
+ * - PATCH: Backwards-compatible bug fixes
+ */
+#define POKER_VERSION_MAJOR 0
+#define POKER_VERSION_MINOR 3
+#define POKER_VERSION_PATCH 0
+#define POKER_VERSION "0.3.0"
+
+/*
+ * Version check macro for compile-time compatibility checks
+ * Calculates version number: major*10000 + minor*100 + patch
+ * Example: POKER_VERSION_CHECK(0, 3, 0) = 300
+ */
+#define POKER_VERSION_CHECK(major, minor, patch) \
+    ((major) * 10000 + (minor) * 100 + (patch))
+
+/*
+ * Current version as integer for comparison
+ * Use with POKER_VERSION_CHECK for conditional compilation:
+ *   #if POKER_VERSION_NUMBER >= POKER_VERSION_CHECK(0, 3, 0)
+ */
+#define POKER_VERSION_NUMBER \
+    POKER_VERSION_CHECK(POKER_VERSION_MAJOR, \
+                        POKER_VERSION_MINOR, \
+                        POKER_VERSION_PATCH)
+
+/*
  * Constants
  */
 #define RANK_ARRAY_SIZE 15  /* Array size for rank indexing (0-14, RANK_ACE=14) */
