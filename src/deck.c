@@ -59,6 +59,7 @@ Deck* deck_new(void) {
     // Allocate deck structure
     Deck* deck = malloc(sizeof(Deck));
     if (deck == NULL) {
+        poker_errno = POKER_ENOMEM;
         return NULL;
     }
 
@@ -66,6 +67,7 @@ Deck* deck_new(void) {
     deck->cards = malloc(DECK_SIZE * sizeof(Card));
     if (deck->cards == NULL) {
         free(deck);
+        poker_errno = POKER_ENOMEM;
         return NULL;
     }
 
