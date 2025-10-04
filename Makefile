@@ -91,7 +91,21 @@ test: all
 .PHONY: examples
 examples: all
 	@echo "Building examples..."
-	@echo "No example programs yet"
+	@mkdir -p $(EXAMPLES_DIR)
+	@echo "Building poker_game..."
+	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/poker_game.c $(LIB) -o $(EXAMPLES_DIR)/poker_game
+	@echo "✓ Built: $(EXAMPLES_DIR)/poker_game"
+	@echo ""
+	@echo "Building hand_detector..."
+	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/hand_detector.c $(LIB) -o $(EXAMPLES_DIR)/hand_detector
+	@echo "✓ Built: $(EXAMPLES_DIR)/hand_detector"
+	@echo ""
+	@echo "=============================================="
+	@echo "All examples built successfully!"
+	@echo ""
+	@echo "Run examples:"
+	@echo "  $(EXAMPLES_DIR)/poker_game"
+	@echo "  $(EXAMPLES_DIR)/hand_detector"
 
 # Install target - install library and headers
 .PHONY: install
@@ -115,6 +129,7 @@ clean:
 	rm -rf $(BUILD_DIR)/*.gcda $(BUILD_DIR)/*.gcno
 	rm -rf $(BUILD_DIR)/detectors/*.gcda $(BUILD_DIR)/detectors/*.gcno
 	rm -rf coverage.info coverage/
+	rm -rf $(EXAMPLES_DIR)/poker_game $(EXAMPLES_DIR)/hand_detector
 	@echo "Cleaned build artifacts"
 
 # Coverage target - generate code coverage reports

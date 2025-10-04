@@ -637,6 +637,122 @@ src/
 - Detector files are compiled into `build/detectors/*.o`
 - All object files are linked into `lib/libpoker.a` static library
 
+## Examples
+
+The `examples/` directory contains working demonstration programs showing how to use the library. These examples use the currently available detector functions to evaluate poker hands.
+
+### Building Examples
+
+Build all example programs:
+
+```bash
+make examples
+```
+
+This creates two executable programs:
+- `examples/poker_game` - Simple poker game demonstration
+- `examples/hand_detector` - Showcases all 10 hand category detectors
+
+### Example Programs
+
+#### poker_game.c - Simple Poker Game
+
+Demonstrates basic library usage including deck creation, shuffling, dealing, and hand evaluation:
+
+```bash
+./examples/poker_game
+```
+
+**Output:**
+```
+=== Simple Poker Game ===
+
+Created deck with 52 cards
+Shuffled deck
+
+Your hand: 9s 4h 2d 3d 7h
+Hand rank: High Card
+
+Cards remaining in deck: 47
+```
+
+**Features demonstrated:**
+- Creating and shuffling a deck
+- Dealing cards from the deck
+- Detecting hand categories using detector functions
+- Converting cards to string representation
+- Proper memory cleanup with `deck_free()`
+
+**Source:** `examples/poker_game.c`
+
+#### hand_detector.c - Hand Category Detectors
+
+Demonstrates all 10 hand category detectors with specific examples for each category:
+
+```bash
+./examples/hand_detector
+```
+
+**Output:**
+```
+=== Hand Detector Examples ===
+Demonstrates all 10 poker hand categories
+
+=== Royal Flush ===
+Hand: Ah Kh Qh Jh Th -> ROYAL FLUSH!
+
+=== Straight Flush ===
+Hand: 9d 8d 7d 6d 5d -> STRAIGHT FLUSH (high card: 9)!
+
+=== Four of a Kind ===
+Hand: Kh Kd Kc Ks 2h -> FOUR OF A KIND (Tiebreakers: 13, 2)!
+
+... (continues for all 10 categories)
+```
+
+**Features demonstrated:**
+- Using all 10 detector functions (`detect_royal_flush()`, `detect_straight_flush()`, etc.)
+- Interpreting tiebreaker arrays for hand comparison
+- Creating specific test hands for each category
+- Printing cards and tiebreakers
+
+**Source:** `examples/hand_detector.c`
+
+### Compiling Examples Manually
+
+You can also compile the examples manually:
+
+```bash
+# Compile poker_game
+gcc -Wall -Wextra -std=c99 -Iinclude examples/poker_game.c lib/libpoker.a -o examples/poker_game
+
+# Compile hand_detector
+gcc -Wall -Wextra -std=c99 -Iinclude examples/hand_detector.c lib/libpoker.a -o examples/hand_detector
+```
+
+### Integration Layer Note
+
+The examples currently use the detector functions directly since the integration layer (`evaluate_hand()`, `compare_hands()`) is not yet implemented (Phase 04). Once Phase 04 is complete, the examples will be updated to demonstrate the high-level API.
+
+**Current approach:**
+```c
+// Manual detection using detector functions
+if (detect_royal_flush(cards, HAND_SIZE)) {
+    category = HAND_ROYAL_FLUSH;
+} else if (detect_straight_flush(cards, HAND_SIZE, NULL)) {
+    category = HAND_STRAIGHT_FLUSH;
+}
+// ... continue checking from strongest to weakest
+```
+
+**Future approach (after Phase 04):**
+```c
+// Automatic detection using evaluate_hand()
+Hand hand;
+evaluate_hand(cards, HAND_SIZE, &hand);
+printf("Hand rank: %s\n", hand_category_name(hand.category));
+```
+
 ## Fuzzing
 
 This project includes comprehensive fuzzing infrastructure to discover edge cases, crashes, and memory safety issues through automated testing. Fuzzing is a security hardening technique that tests the library with millions of random inputs to find bugs that traditional unit tests might miss.
