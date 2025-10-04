@@ -127,7 +127,7 @@ int parse_card(const char* const str, Card* const out_card);
  * Deck structure
  *
  * Represents a dynamic array of cards with capacity tracking.
- * Used for standard 52-card deck and can support deck manipulation operations.
+ * Used for standard DECK_SIZE-card deck and can support deck manipulation operations.
  */
 typedef struct {
     Card* cards;     /* Dynamic array of cards */
@@ -136,7 +136,7 @@ typedef struct {
 } Deck;
 
 /**
- * @brief Create new deck with 52 cards
+ * @brief Create new deck with DECK_SIZE cards
  * @return Pointer to new Deck, or NULL on allocation failure
  */
 Deck* deck_new(void);
@@ -173,7 +173,7 @@ void deck_free(Deck* const deck);
  * @brief Shuffle deck using Fisher-Yates algorithm
  *
  * Shuffles the deck in-place using the Fisher-Yates (Knuth) shuffle algorithm,
- * which provides a uniform random permutation of all 52 cards. The algorithm
+ * which provides a uniform random permutation of all DECK_SIZE cards. The algorithm
  * iterates backwards through the array, swapping each element with a randomly
  * selected element from the unshuffled portion.
  *
@@ -202,7 +202,7 @@ size_t deck_deal(Deck* const deck, Card* const out_cards, const size_t n);
 /**
  * @brief Check if all cards are the same suit
  * @param cards Array of cards
- * @param len Number of cards (must be 5)
+ * @param len Number of cards (must be HAND_SIZE)
  * @return 1 if flush, 0 otherwise
  */
 int is_flush(const Card* const cards, const size_t len);
@@ -210,7 +210,7 @@ int is_flush(const Card* const cards, const size_t len);
 /**
  * @brief Check if cards form a straight
  * @param cards Array of cards to check
- * @param len Number of cards (must be 5)
+ * @param len Number of cards (must be HAND_SIZE)
  * @param out_high_card Optional pointer to receive high card rank
  * @return 1 if straight detected, 0 otherwise
  */
@@ -220,14 +220,14 @@ int is_straight(const Card* const cards, const size_t len, Rank* const out_high_
  * @brief Count frequency of each rank
  * @param cards Array of cards
  * @param len Number of cards
- * @param counts Output array[15] to receive counts (indexed by Rank)
+ * @param counts Output array[RANK_ARRAY_SIZE] to receive counts (indexed by Rank)
  */
 void rank_counts(const Card* const cards, const size_t len, int* const counts);
 
 /**
  * @brief Detect four of a kind
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param counts Optional pre-computed rank counts (can be NULL)
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
@@ -240,8 +240,8 @@ int detect_four_of_a_kind(const Card* const cards, const size_t len,
 
 /**
  * @brief Detect full house
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param counts Optional pre-computed rank counts (can be NULL)
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
@@ -254,8 +254,8 @@ int detect_full_house(const Card* const cards, const size_t len,
 
 /**
  * @brief Detect three of a kind (no pair)
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param counts Optional pre-computed rank counts (can be NULL)
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
@@ -268,8 +268,8 @@ int detect_three_of_a_kind(const Card* const cards, const size_t len,
 
 /**
  * @brief Detect two pair
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param counts Optional pre-computed rank counts (can be NULL)
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
@@ -282,8 +282,8 @@ int detect_two_pair(const Card* const cards, const size_t len,
 
 /**
  * @brief Detect one pair
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param counts Optional pre-computed rank counts (can be NULL)
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
@@ -296,8 +296,8 @@ int detect_one_pair(const Card* const cards, const size_t len,
 
 /**
  * @brief Detect straight flush
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param out_high_card Pointer to receive high card rank (can be NULL)
  * @return 1 if straight flush, 0 otherwise
  */
@@ -305,16 +305,16 @@ int detect_straight_flush(const Card* const cards, const size_t len, Rank* const
 
 /**
  * @brief Detect royal flush
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @return 1 if royal flush, 0 otherwise
  */
 int detect_royal_flush(const Card* const cards, const size_t len);
 
 /**
  * @brief Detect flush (non-straight)
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
  * @return 1 if flush, 0 otherwise
@@ -325,8 +325,8 @@ int detect_flush(const Card* const cards, const size_t len,
 
 /**
  * @brief Detect straight (non-flush)
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
  * @return 1 if straight, 0 otherwise
@@ -337,11 +337,11 @@ int detect_straight(const Card* const cards, const size_t len,
 
 /**
  * @brief Detect high card (always succeeds for valid input)
- * @param cards Array of exactly 5 cards
- * @param len Must be 5
+ * @param cards Array of exactly HAND_SIZE cards
+ * @param len Must be HAND_SIZE
  * @param out_tiebreakers Output array for tiebreaker ranks
  * @param out_num_tiebreakers Pointer to receive count of tiebreakers
- * @return 1 if valid 5-card input, 0 otherwise
+ * @return 1 if valid HAND_SIZE-card input, 0 otherwise
  */
 int detect_high_card(const Card* const cards, const size_t len,
                      Rank* const out_tiebreakers,
@@ -350,15 +350,15 @@ int detect_high_card(const Card* const cards, const size_t len,
 /*
  * Maximum number of tiebreaker ranks in Hand struct
  */
-#define MAX_TIEBREAKERS 5
+#define MAX_TIEBREAKERS HAND_SIZE
 
 /*
  * Hand structure
  *
- * Represents an evaluated 5-card poker hand with its category and tiebreakers.
+ * Represents an evaluated HAND_SIZE-card poker hand with its category and tiebreakers.
  *
  * Fields:
- * - cards: Fixed-size array containing exactly 5 cards that form the hand
+ * - cards: Fixed-size array containing exactly HAND_SIZE cards that form the hand
  * - category: The hand type (HAND_HIGH_CARD to HAND_ROYAL_FLUSH) that identifies
  *             the poker hand ranking category
  * - tiebreakers: Array of ranks in descending order of importance used to break
@@ -373,7 +373,7 @@ int detect_high_card(const Card* const cards, const size_t len,
  * - Ranks in tiebreakers are ordered by importance for efficient comparison
  */
 typedef struct {
-    Card cards[5];                      /* Exactly 5 cards */
+    Card cards[HAND_SIZE];              /* Exactly HAND_SIZE cards */
     HandCategory category;               /* Hand type */
     Rank tiebreakers[MAX_TIEBREAKERS];  /* Ranks for tiebreaking */
     size_t num_tiebreakers;             /* Number of valid tiebreakers */
