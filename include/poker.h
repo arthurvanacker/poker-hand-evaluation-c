@@ -200,12 +200,56 @@ Deck* deck_new(void);
 void deck_free(Deck* const deck);
 
 /**
+ * @brief Generate unbiased random number in range [0, max)
+ *
+ * Uses rejection sampling to eliminate modulo bias that occurs with
+ * naive `rand() % max` approach. The modulo operation introduces bias
+ * when RAND_MAX+1 is not evenly divisible by max, causing some values
+ * to be slightly more likely than others.
+ *
+ * Algorithm:
+ * 1. Calculate limit = RAND_MAX - (RAND_MAX % max)
+ * 2. Generate random number r = rand()
+ * 3. If r >= limit, reject and retry (ensures uniform distribution)
+ * 4. Return r % max (now unbiased since r is from uniform subset)
+ *
+ * Example of modulo bias:
+ * - If RAND_MAX = 32767 and max = 10:
+ *   - RAND_MAX % 10 = 7
+ *   - Values 0-7 appear 3278 times each
+ *   - Values 8-9 appear 3277 times each
+ *   - Bias: ~0.03% difference
+ *
+ * For standard 52-card deck:
+ * - RAND_MAX = 32767, max = 52
+ * - RAND_MAX % 52 = 47
+ * - Bias is negligible but non-zero (~0.15% difference)
+ *
+ * Rejection sampling eliminates this bias entirely by only using
+ * random values from [0, limit) where limit is the largest multiple
+ * of max that is <= RAND_MAX.
+ *
+ * Time complexity: O(1) expected (rejection probability is very low)
+ * Space complexity: O(1)
+ *
+ * @param max Upper bound (exclusive) - returns value in [0, max)
+ * @return Unbiased random number in range [0, max)
+ *
+ * @note This is a static helper function used internally by deck_shuffle.
+ *       For testing purposes, it's exposed in the header.
+ */
+size_t random_range(const size_t max);
+
+/**
  * @brief Shuffle deck using Fisher-Yates algorithm
  *
  * Shuffles the deck in-place using the Fisher-Yates (Knuth) shuffle algorithm,
  * which provides a uniform random permutation of all DECK_SIZE cards. The algorithm
  * iterates backwards through the array, swapping each element with a randomly
  * selected element from the unshuffled portion.
+ *
+ * Uses unbiased random_range() function to eliminate modulo bias that
+ * occurred in previous implementation using `rand() % (i+1)`.
  *
  * Time complexity: O(n) where n is the number of cards
  * Space complexity: O(1) - shuffles in-place

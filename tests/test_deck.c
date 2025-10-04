@@ -257,6 +257,72 @@ void test_deck_shuffle_randomness(void) {
     printf("  ✓ Different seeds produce different shuffle results\n");
 }
 
+void test_random_range_basic(void) {
+    printf("Testing random_range basic functionality...\n");
+
+    // Test that random_range returns values in valid range
+    srand(42);
+
+    // Test range [0, 5) - should return 0-4
+    for (int i = 0; i < 100; i++) {
+        size_t r = random_range(5);
+        assert(r < 5);
+    }
+
+    // Test range [0, 1) - should always return 0
+    for (int i = 0; i < 10; i++) {
+        size_t r = random_range(1);
+        assert(r == 0);
+    }
+
+    // Test range [0, 52) - standard deck size
+    for (int i = 0; i < 100; i++) {
+        size_t r = random_range(52);
+        assert(r < 52);
+    }
+
+    printf("  ✓ random_range returns values in valid range\n");
+}
+
+void test_random_range_distribution_uniformity(void) {
+    printf("Testing random_range distribution uniformity (chi-square test)...\n");
+
+    // Test with small range for easier verification
+    const size_t max = 10;
+    const size_t trials = 10000;
+    size_t counts[10] = {0};
+
+    srand(12345);
+
+    // Generate random numbers and count frequency
+    for (size_t i = 0; i < trials; i++) {
+        size_t r = random_range(max);
+        assert(r < max);
+        counts[r]++;
+    }
+
+    // Expected frequency: trials / max
+    double expected = (double)trials / (double)max;
+
+    // Calculate chi-square statistic
+    // χ² = Σ((observed - expected)² / expected)
+    double chi_square = 0.0;
+    for (size_t i = 0; i < max; i++) {
+        double diff = (double)counts[i] - expected;
+        chi_square += (diff * diff) / expected;
+    }
+
+    // For df=9 (max-1) and α=0.05, critical value is 16.919
+    // If chi_square > 16.919, reject null hypothesis (distribution is not uniform)
+    // We expect chi_square to be < 16.919 for uniform distribution
+    printf("    Chi-square statistic: %.2f (critical value: 16.919 at α=0.05)\n", chi_square);
+
+    // Allow some statistical variance - use α=0.01 (critical value 21.666) for more lenient test
+    assert(chi_square < 21.666);
+
+    printf("  ✓ random_range produces uniform distribution (chi-square test passed)\n");
+}
+
 void test_deck_deal_basic(void) {
     printf("Testing deck_deal basic functionality...\n");
 
@@ -539,6 +605,8 @@ int main(void) {
     test_deck_shuffle_preserves_all_cards();
     test_deck_shuffle_changes_order();
     test_deck_shuffle_randomness();
+    test_random_range_basic();
+    test_random_range_distribution_uniformity();
     test_deck_deal_basic();
     test_deck_deal_zero_cards();
     test_deck_deal_all_cards();
