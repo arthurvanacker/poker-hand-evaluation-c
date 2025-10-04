@@ -10,6 +10,13 @@
 #include <stdint.h>
 
 /*
+ * Constants
+ */
+#define RANK_ARRAY_SIZE 15  /* Array size for rank indexing (0-14, RANK_ACE=14) */
+#define HAND_SIZE 5         /* Standard 5-card poker hand */
+#define DECK_SIZE 52        /* Standard deck (4 suits × 13 ranks) */
+
+/*
  * Error codes - Following errno conventions
  *
  * The poker library uses a global error indicator (poker_errno) similar
