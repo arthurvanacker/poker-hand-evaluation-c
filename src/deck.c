@@ -8,9 +8,9 @@
 #include <string.h>
 
 /**
- * @brief Create new deck with 52 cards
+ * @brief Create new deck with DECK_SIZE cards
  *
- * Allocates a new deck structure and populates it with all 52 standard
+ * Allocates a new deck structure and populates it with all DECK_SIZE standard
  * playing cards (13 ranks × 4 suits). Cards are generated in nested loop
  * order: outer loop iterates ranks (2-Ace), inner loop iterates suits.
  *
@@ -23,18 +23,18 @@ Deck* deck_new(void) {
         return NULL;
     }
 
-    // Allocate cards array for 52 cards
-    deck->cards = malloc(52 * sizeof(Card));
+    // Allocate cards array for DECK_SIZE cards
+    deck->cards = malloc(DECK_SIZE * sizeof(Card));
     if (deck->cards == NULL) {
         free(deck);
         return NULL;
     }
 
     // Set size and capacity
-    deck->size = 52;
-    deck->capacity = 52;
+    deck->size = DECK_SIZE;
+    deck->capacity = DECK_SIZE;
 
-    // Generate all 52 cards (4 suits × 13 ranks)
+    // Generate all DECK_SIZE cards (4 suits × 13 ranks)
     size_t index = 0;
     for (int rank = RANK_TWO; rank <= RANK_ACE; rank++) {
         for (int suit = SUIT_HEARTS; suit <= SUIT_SPADES; suit++) {
